@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/myblog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/myblog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/myblog/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/myblog/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/myblog/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/myblog/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/myblog/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="区块链,读书笔记,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;《EthFans精选 | 以太坊入门清单》传送门：https://ethfans.org/posts/1099 &amp;emsp;&amp;emsp;感谢整理人月亮🌛以及各篇文章作者。好几篇写到非常浅显易懂的地步了，本文为学习札记，理清记录了区块链、比特币，以及以太坊最基本的概念与联系。">
+<meta name="keywords" content="区块链,读书笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《以太坊入门三篇》学习札记">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/04/22/《以太坊入门三篇》学习札记/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;《EthFans精选 | 以太坊入门清单》传送门：https://ethfans.org/posts/1099 &amp;emsp;&amp;emsp;感谢整理人月亮🌛以及各篇文章作者。好几篇写到非常浅显易懂的地步了，本文为学习札记，理清记录了区块链、比特币，以及以太坊最基本的概念与联系。">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://lijiaweinpc.github.io/myblog/2018/04/22/《以太坊入门三篇》学习札记/以太坊.png">
+<meta property="og:updated_time" content="2018-10-15T13:20:53.684Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《以太坊入门三篇》学习札记">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;《EthFans精选 | 以太坊入门清单》传送门：https://ethfans.org/posts/1099 &amp;emsp;&amp;emsp;感谢整理人月亮🌛以及各篇文章作者。好几篇写到非常浅显易懂的地步了，本文为学习札记，理清记录了区块链、比特币，以及以太坊最基本的概念与联系。">
+<meta name="twitter:image" content="https://lijiaweinpc.github.io/myblog/2018/04/22/《以太坊入门三篇》学习札记/以太坊.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/myblog/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://lijiaweinpc.github.io/2018/04/22/《以太坊入门三篇》学习札记/">
+
+
+
+
+
+  <title>《以太坊入门三篇》学习札记 | VOID</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/myblog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VOID</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/myblog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/myblog/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/myblog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/myblog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/myblog/2018/04/22/《以太坊入门三篇》学习札记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="jiawei">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/myblog/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">《以太坊入门三篇》学习札记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-22T12:50:42+08:00">
+                2018-04-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;<em>《EthFans精选 | 以太坊入门清单》传送门：</em><a href="https://ethfans.org/posts/1099" target="_blank" rel="noopener">https://ethfans.org/posts/1099</a></p>
+<p>&emsp;&emsp;<em>感谢整理人月亮🌛以及各篇文章作者。好几篇写到非常浅显易懂的地步了，本文为学习札记，理清记录了区块链、比特币，以及以太坊最基本的概念与联系。</em></p>
+<a id="more"></a>
+<h1 id="区块链是什么-《科普-区块链是什么鬼？》"><a href="#区块链是什么-《科普-区块链是什么鬼？》" class="headerlink" title="区块链是什么:《科普 | 区块链是什么鬼？》"></a>区块链是什么:《科普 | 区块链是什么鬼？》</h1><p>&emsp;&emsp;<a href="http://ethfans.org/toya/articles/wtf-is-the-blockchain" target="_blank" rel="noopener">http://ethfans.org/toya/articles/wtf-is-the-blockchain</a></p>
+<p>&emsp;&emsp;区块链想要解决的问题是去中心化的建立互信，举个例子：你向朋友转账可以通过银行这一系统，由他在账本上记录了你们两个人账户余额的变化，银行是我们互信的第三方中心。我们公信的银行有些你不能说完全不可能的事件：</p>
+<ul>
+<li>记录账本数据丢失或者遭到攻击；</li>
+<li>记录账本数据出错，比如转账$1000记成了$1500；</li>
+<li>银行贪腐堕落。</li>
+</ul>
+<p>&emsp;&emsp;区块链可以让我们自己维护所谓账本而不再需要银行在中间操作。举个例子：想象你给一个人转账，你在网络上大吼一声，我要转$1000给某某某,这个网络里的所有人都掏出一个小本本看你有这么多钱，好的记下来你的转账信息；我们就这样一笔一笔的所有人一起记录，大家写满一张纸（一个区块）之后用统一的方法（hash）来将它封存，再新拿出来一张纸继续记录，以此往复。</p>
+<p>&emsp;&emsp;hash函数的引入确保了大家不会记错，我们可以很快速的计算出假设’nihao’的hash值hash(‘nihao’)=’9527’，他的结果是确定的以及定长的,但要算出来’9527’的输入是’nihao’是非常困难的。因为hash的特性，我们求每个一整页账本内容的对应值（封条），满足该内容和对应值某种运算后的hash值以三个0开头（某个验证条件）。比如对内容’hello’，假设我们经过多次尝试发现hello+world=begin，而hash(‘begin’)=000666满足条件以三个0开头，那么world就是hello这页内容的封条。</p>
+<p>&emsp;&emsp;在这页纸记hello完成的时候，大家都跑去找world，hash特性使得这个过程是需要计算力的，第一个人找到world以后向大家公布，我们来验证hello+world=begin，而hash(‘begin’)=000666满足条件是很轻松的。于是我们记在这张纸上，就完成了本页的封存（一个区块）。现在你发现大家都认可world而你这边的hash结果不对，那你就知道哦你记的肯定是错了不是我们公认的hello。</p>
+<p>&emsp;&emsp;为了鼓励大家积极地去计算寻找world，网络给第一个找到他的人准备了奖励，来支付付出的CPU算力和电力（挖矿）。这个奖励可以成为认可货币吗？那论坛币，游戏币，收藏币……？</p>
+<p>&emsp;&emsp;最后还一个问题，如果随后我又写了五页纸了跑去改hello，我还把world一起改了怎么办？我搞了个hexo+next=begin？所以我们修正这里的逻辑：我们的计算把之前一张纸的封条也考虑进来，现在要找到比如hello+kitty+000520=000……中的kitty，这下你要改后面的五页你就得全改了，我们始终相信网络中最长的一支是可信的，大家一起计算着block的封条，所以你有改这的功夫，他指不定又增长到多少了，这就是为什么说他不可修改。而现在我们聊的也就从区块变成了区块链了。</p>
+<p>&emsp;&emsp;区块链建立在大部分人是诚实的这一前提基础上，如果你伙同了半数以上的算力强行去改一条链上的内容，当然他是会陷落的，但此时不也实质上是一条新的区块链在诞生了吗^_^?两个小注：</p>
+<ul>
+<li>账本公开所以每个钱包地址的余额也是公开的，但我不知道这是谁的钱包。</li>
+<li>“三个0开头”只是一个例子。hash实际当中的挑战要比这个难得多。常用的hash有MD5,SHA1等，文件校验非常常见。</li>
+</ul>
+<h1 id="以太坊到底是啥-《科普-以太坊到底是啥？》"><a href="#以太坊到底是啥-《科普-以太坊到底是啥？》" class="headerlink" title="以太坊到底是啥:《科普 | 以太坊到底是啥？》"></a>以太坊到底是啥:《科普 | 以太坊到底是啥？》</h1><p>&emsp;&emsp; <a href="http://ethfans.org/posts/what-is-ethereum-17-12-15" target="_blank" rel="noopener">http://ethfans.org/posts/what-is-ethereum-17-12-15</a></p>
+<p>&emsp;&emsp;首先小结区块链：区块链就是数据库，每个人都有数据库的副本，无法被修改或删除的数据库（链hash）。</p>
+<p>&emsp;&emsp;比特币存储了金融交易记录，而以太坊分布式虚拟机存储并执行着智能合约，他的区块链交易格式包括；Timestamp,Sender,Recipient,Amount,Data。什么时间谁向谁发起多大金额的什么智能合约，于是存在着三种交易：</p>
+<ul>
+<li>用户以太币转账；human Sender,Recipient然后No Data</li>
+<li>创建智能合约；Sender,No Recipient然后Data里Creat Smart Contract</li>
+<li>用户和智能合约之间的以太币转账；Sender,Smart Contract Recipient然后Data里Execute Smart Contract</li>
+</ul>
+<p>&emsp;&emsp;智能合约可以简单地理解为确定的规则，以太坊提供了智能合约的编写平台。比如我和你打赌100块明天会不会下雨，我写好这份合约下雨你赢不下我赢，我们再各自将100块转给智能合约（这样就公布到了全网，将这一事件写入“账本”），第二天按事实情况自动的将这一合约结果执行。从此例可以感受到智能合约带给区块链更多的选项，使以太坊可以做更多的事而不仅仅是发币。</p>
+<p>&emsp;&emsp;使用智能合约的用户必须支付一定费用（Gas）去执行该合约。该费用支付给实际使用内存、硬盘、计算和电力执行这一智能合约的节点。当合约执行完成之时，或是<strong>达到Gas限制</strong>之时，都会停止执行该合约。</p>
+<p>&emsp;&emsp;以太坊的智能合约网络中的每个节点都会去执行，这台去中心化的分布式计算机运行会很缓慢，但只有每个节点都出故障之时，他才会出故障~</p>
+<h1 id="智能合约·概念及应用-《智能合约》"><a href="#智能合约·概念及应用-《智能合约》" class="headerlink" title="智能合约·概念及应用:《智能合约》"></a>智能合约·概念及应用:《智能合约》</h1><p>&emsp;&emsp;<a href="http://ethfans.org/wikis/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6" target="_blank" rel="noopener">http://ethfans.org/wikis/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6</a></p>
+<p>&emsp;&emsp;智能合约是 1990s 年代由尼克萨博提出的理念，一直缺少可信的执行环境。比特币使人们认识区块链可以为智能合约提供可信的环境，以太坊努力的目标就是复活智能合约。</p>
+<p>&emsp;&emsp;简单地讲，以太坊 = 区块链 + 智能合约。与比特币相比，以太坊支持更加强大的脚本语言，允许开发者在上面开发任意应用，实现任意智能合约。</p>
+<p>&emsp;&emsp;几个可以做金融智能合约的例子：</p>
+<ul>
+<li>差价合约</li>
+<li>代币系统</li>
+<li>储蓄钱包</li>
+<li>作物保险</li>
+<li>多重签名智能合约</li>
+</ul>
+<img src="/myblog/2018/04/22/《以太坊入门三篇》学习札记/以太坊.png">
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/myblog/tags/区块链/" rel="tag"># 区块链</a>
+          
+            <a href="/myblog/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/myblog/2018/04/14/《Python数据分析与挖掘实战》读书笔记/" rel="next" title="《Python数据分析与挖掘实战》读书笔记">
+                <i class="fa fa-chevron-left"></i> 《Python数据分析与挖掘实战》读书笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/myblog/2018/06/13/外汇历史数据建库/" rel="prev" title="外汇历史数据建库">
+                外汇历史数据建库 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/myblog/images/avatar.jpg" alt="jiawei">
+            
+              <p class="site-author-name" itemprop="name">jiawei</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/myblog/archives/">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/myblog/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://gitee.com/npc_li" target="_blank" title="Gitee">
+                      
+                        <i class="fa fa-fw fa-github"></i>Gitee</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:npc_li@163.com" target="_blank" title="Email">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>Email</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#区块链是什么-《科普-区块链是什么鬼？》"><span class="nav-number">1.</span> <span class="nav-text">区块链是什么:《科普 | 区块链是什么鬼？》</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#以太坊到底是啥-《科普-以太坊到底是啥？》"><span class="nav-number">2.</span> <span class="nav-text">以太坊到底是啥:《科普 | 以太坊到底是啥？》</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#智能合约·概念及应用-《智能合约》"><span class="nav-number">3.</span> <span class="nav-text">智能合约·概念及应用:《智能合约》</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">jiawei</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/myblog/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/myblog/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/myblog/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/myblog/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/myblog/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/myblog/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/myblog/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/myblog/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/myblog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('10');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/myblog/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/myblog/live2dw/assets/z16.model.json"},"display":{"position":"left","width":100,"height":200},"mobile":{"show":true},"log":false});</script></body>
+</html>
