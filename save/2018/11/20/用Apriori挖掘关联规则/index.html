@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据挖掘,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。">
+<meta name="keywords" content="数据挖掘">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Apriori挖掘关联规则">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/11/20/用Apriori挖掘关联规则/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-01-28T12:29:49.192Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="用Apriori挖掘关联规则">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://lijiaweinpc.github.io/2018/11/20/用Apriori挖掘关联规则/">
+
+
+
+
+
+  <title>用Apriori挖掘关联规则 | VOID</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VOID</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2018/11/20/用Apriori挖掘关联规则/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="jiawei">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">用Apriori挖掘关联规则</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-20T20:45:24+08:00">
+                2018-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。</p>
+<a id="more"></a>
+<p>&emsp;&emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。举个例子：当support(A) &lt; support threshold，那显然会有support(A,B) &lt; support threshold，频繁项的子集必定是频繁项；所以当我们发现了这样一个A不满足我们挖掘所设置的支持度阈值的时候，所有涉及A的组合也不必再进行统计了。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。<br>&emsp;&emsp;在找到了所有频繁项以及统计出支持度后，我们还会用关联度（其实还有提升度）来筛选生成规则。所谓规则，我们想要得到的insights是买了AB的人大概率会买C，这样我们就可以把C推荐给再来买AB的人……举个例子：就用上面的ABC，当我们发现了这个频繁集(A,B,C)之后，我们依次去检视以下规则的概率（即关联度）：<br>&emsp;&emsp;(B,C) =&gt; A; (A,C) =&gt; B; (A,B) =&gt; C<br>&emsp;&emsp;关联度需要：conf = P((A,B) =&gt; C) = P(A,B,C) / P(A,B) &gt; confidence threshold<br>&emsp;&emsp;提升度需要：lift = P((A,B) =&gt; C) / P(C) &gt; lift threshold<br>&emsp;&emsp;在上例中，支持度要求(A,B,C)首先是个频繁集，那么我们找到的并不是一个很小众的规则；关联度保证了买(A,B)组合的人大概率会买C，它是我们挖掘规则的直观价值；提升度的本质是相关性，若提升度很低(&lt;1)，买C的人本身就很多，任何情况你推荐买C都有道理，那这条规则也没有意义。<br>&emsp;&emsp;在挖掘规则中，上例的情况很多时候大家会检视所有子集生成规则的概率，即还包括：<br>&emsp;&emsp;A =&gt; (B,C); B =&gt; (A,C); C =&gt; (B,C)<br>&emsp;&emsp;如果上升到(A,B,C,D)，更会有：A =&gt; (B,C,D); (A,B) =&gt; (C,D)……<br>&emsp;&emsp;这样带来的问题是结果集非常的冗余，所以这里我只挖掘规则右边RHS只有一个item的规则，压缩结果同时也能提高算法和结果审视的效率。我在挖掘频繁项和生成规则中都加了进度打印(区间为整个过程的10%~90%)，格式是方便前台转为进度条呈现；每次打印都使用sys.stdout.flush()是为了作为文件被jython调用的话可以实时捕获到我的打印。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">c1_create</span><span class="params">(dataset)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    将dataset中的所有单个部件A, B, C, D排序整理成[['A'], ['B'], ['C'], ['D']]，</span></span><br><span class="line"><span class="string">    返回时再转成frozenset, frozenset与set的区别是可以作为字典的键。</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    c1 = []</span><br><span class="line">    <span class="keyword">for</span> transaction <span class="keyword">in</span> dataset:</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> transaction:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> [item] <span class="keyword">in</span> c1:</span><br><span class="line">                c1.append([item])</span><br><span class="line">    c1.sort()</span><br><span class="line">    <span class="keyword">return</span> list(map(frozenset, c1))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apriori_gen</span><span class="params">(lk, k)</span>:</span></span><br><span class="line">    <span class="string">"""由初始候选项集的集合Lk生成新的生成候选项集"""</span></span><br><span class="line">    retlist = []</span><br><span class="line">    lenlk = len(lk)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(lenlk):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(i + <span class="number">1</span>, lenlk):</span><br><span class="line">            <span class="comment"># AB 和 AC 中因为A相等才能拿来生成 ABC, 确保了生成的是k项</span></span><br><span class="line">            l1 = list(lk[i])</span><br><span class="line">            l2 = list(lk[j])</span><br><span class="line">            l1.sort()</span><br><span class="line">            l2.sort()</span><br><span class="line">            <span class="keyword">if</span> l1[: k - <span class="number">2</span>] == l2[: k - <span class="number">2</span>]:</span><br><span class="line">                retlist.append(lk[i] | lk[j])</span><br><span class="line">    <span class="keyword">return</span> retlist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">support_cal</span><span class="params">(d, ck, minsupport)</span>:</span></span><br><span class="line">    <span class="string">"""计算备选项集的支持度，将满足minSupport要求的项集加入L，将项集支持度字典返回为supportData"""</span></span><br><span class="line">    sscnt = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> tid <span class="keyword">in</span> d:</span><br><span class="line">        <span class="keyword">for</span> can <span class="keyword">in</span> ck:</span><br><span class="line">            <span class="keyword">if</span> can.issubset(tid):</span><br><span class="line">                <span class="keyword">if</span> can <span class="keyword">not</span> <span class="keyword">in</span> sscnt:</span><br><span class="line">                    sscnt[can] = d[tid]</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    sscnt[can] += d[tid]</span><br><span class="line">    numitems = float(sum(d.values()))</span><br><span class="line">    retlist = []</span><br><span class="line">    supportdata = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> sscnt:</span><br><span class="line">        support = sscnt[key] / numitems</span><br><span class="line">        <span class="keyword">if</span> support &gt;= minsupport:</span><br><span class="line">            retlist.insert(<span class="number">0</span>, key)</span><br><span class="line">            supportdata[key] = support</span><br><span class="line">    <span class="keyword">return</span> retlist, supportdata</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conf_cal</span><span class="params">(freqset, supportdata, rulelist, minconf)</span>:</span></span><br><span class="line">    <span class="string">"""计算置信度和提升度，生成规则的内部函数"""</span></span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> freqset:</span><br><span class="line">        conseq = frozenset([item])</span><br><span class="line">        conf = supportdata[freqset] / supportdata[freqset - conseq]</span><br><span class="line">        lift = supportdata[freqset] / (supportdata[conseq] * supportdata[freqset - conseq])</span><br><span class="line">        <span class="keyword">if</span> conf &gt;= minconf <span class="keyword">and</span> lift &gt; <span class="number">1</span>:</span><br><span class="line">            rulelist.append((freqset - conseq, conseq, round(supportdata[freqset], <span class="number">4</span>), conf, lift))</span><br><span class="line">    <span class="keyword">return</span> rulelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rules_gen</span><span class="params">(l, supportdata, minconf)</span>:</span></span><br><span class="line">    <span class="string">"""生成规则"""</span></span><br><span class="line">    bigrulelist = []</span><br><span class="line">    step = int(<span class="number">40</span> / len(l))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(l)):</span><br><span class="line">        <span class="keyword">for</span> freqset <span class="keyword">in</span> l[i]:</span><br><span class="line">            conf_cal(freqset, supportdata, bigrulelist, minconf)</span><br><span class="line">        print(<span class="string">'正在进行部件组合的关联分析:'</span> + str(i) + <span class="string">'/'</span> + str(len(l)) + <span class="string">'#'</span> + str(<span class="number">50</span> + i * step))</span><br><span class="line">        sys.stdout.flush()</span><br><span class="line">    <span class="keyword">return</span> bigrulelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apriori_main</span><span class="params">(dataset, minsupport)</span>:</span></span><br><span class="line">    <span class="string">"""用Apriori算法挖掘频繁集，maxconflen是最长集合的长度，他是挖掘可能的最大深度"""</span></span><br><span class="line">    step = max(int(<span class="number">40</span> / maxconflen), <span class="number">1</span>)</span><br><span class="line">    c1 = c1_create(dataset)</span><br><span class="line">    l1, supportdata = support_cal(dataset, c1, minsupport)</span><br><span class="line">    print(<span class="string">'正在进行迭代分析:1/'</span> + str(maxconflen) + <span class="string">'#'</span> + str(<span class="number">10</span> + step))</span><br><span class="line">    sys.stdout.flush()</span><br><span class="line">    <span class="comment"># 一个k项集整体是la的一个元素</span></span><br><span class="line">    la = [l1]</span><br><span class="line">    k = <span class="number">2</span></span><br><span class="line">    <span class="comment"># 迭代计算的新k频繁集会追加在L中</span></span><br><span class="line">    <span class="keyword">while</span> len(la[k - <span class="number">2</span>]) &gt; <span class="number">0</span>:</span><br><span class="line">        ck = apriori_gen(la[k - <span class="number">2</span>], k)</span><br><span class="line">        lk, supk = support_cal(dataset, ck, minsupport)</span><br><span class="line">        supportdata.update(supk)</span><br><span class="line">        la.append(lk)</span><br><span class="line">        print(<span class="string">'正在进行迭代分析:'</span> + str(k) + <span class="string">'/'</span> + str(maxconflen) + <span class="string">'#'</span> + str(<span class="number">10</span> + k * step))</span><br><span class="line">        sys.stdout.flush()</span><br><span class="line">        k += <span class="number">1</span></span><br><span class="line">    <span class="comment"># 最后一个k总会没有备选项了可以把它删掉</span></span><br><span class="line">    <span class="keyword">del</span> la[<span class="number">-1</span>]</span><br><span class="line">    <span class="keyword">return</span> la, supportdata</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    support = <span class="number">0.3</span></span><br><span class="line">    confidence = <span class="number">0.7</span></span><br><span class="line">    <span class="comment"># 输入源为嵌套list，中间每一个list为一笔记录</span></span><br><span class="line">    dataSource = [[<span class="string">'r'</span>, <span class="string">'z'</span>, <span class="string">'h'</span>, <span class="string">'j'</span>, <span class="string">'p'</span>], [<span class="string">'z'</span>, <span class="string">'y'</span>, <span class="string">'x'</span>, <span class="string">'w'</span>, <span class="string">'v'</span>, <span class="string">'u'</span>, <span class="string">'t'</span>, <span class="string">'s'</span>], [<span class="string">'z'</span>], [<span class="string">'r'</span>, <span class="string">'x'</span>, <span class="string">'n'</span>, <span class="string">'o'</span>, <span class="string">'s'</span>],</span><br><span class="line">                  [<span class="string">'y'</span>, <span class="string">'r'</span>, <span class="string">'x'</span>, <span class="string">'z'</span>, <span class="string">'q'</span>, <span class="string">'t'</span>, <span class="string">'p'</span>], [<span class="string">'y'</span>, <span class="string">'z'</span>, <span class="string">'x'</span>, <span class="string">'e'</span>, <span class="string">'q'</span>, <span class="string">'s'</span>, <span class="string">'t'</span>, <span class="string">'m'</span>]]</span><br><span class="line">    <span class="comment"># 预处理，转为每一种订单结构的dict(frozenset:cnt)，并取得最长订单的长度</span></span><br><span class="line">    dataSet = &#123;&#125;</span><br><span class="line">    maxconflen = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> order <span class="keyword">in</span> dataSource:</span><br><span class="line">        <span class="keyword">if</span> frozenset(order) <span class="keyword">in</span> dataSet:</span><br><span class="line">            dataSet[frozenset(order)] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataSet[frozenset(order)] = <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> len(order) &gt; maxconflen:</span><br><span class="line">                maxconflen = len(order)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 挖掘频繁项集，需要最小支持度</span></span><br><span class="line">    L, supportData = apriori_main(dataSet, support)</span><br><span class="line">    <span class="comment"># 生成规则，需要最小关联度，内置了提升度要求lift &gt; 1</span></span><br><span class="line">    rules = pd.DataFrame(rules_gen(L, supportData, confidence))</span><br><span class="line">    rules.rename(index=str, columns=&#123;<span class="number">0</span>: <span class="string">'LHS'</span>, <span class="number">1</span>: <span class="string">'RHS'</span>, <span class="number">2</span>: <span class="string">'Support'</span>, <span class="number">3</span>: <span class="string">'Confidence'</span>, <span class="number">4</span>: <span class="string">'Lift'</span>&#125;, inplace=<span class="keyword">True</span>)</span><br><span class="line">    print(rules)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/数据挖掘/" rel="tag"># 数据挖掘</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/14/lasso-randomforest预测房价/" rel="next" title="lasso+randomforest预测房价">
+                <i class="fa fa-chevron-left"></i> lasso+randomforest预测房价
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/23/用LDA主题模型做场景分类/" rel="prev" title="用LDA主题模型做场景分类">
+                用LDA主题模型做场景分类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="jiawei">
+            
+              <p class="site-author-name" itemprop="name">jiawei</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://gitee.com/npc_li" target="_blank" title="Gitee">
+                      
+                        <i class="fa fa-fw fa-github"></i>Gitee</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:npc_li@163.com" target="_blank" title="Email">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>Email</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">jiawei</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('10');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":100,"height":200},"mobile":{"show":true},"log":false});</script></body>
+</html>

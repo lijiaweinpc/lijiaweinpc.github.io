@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="读书笔记,数据挖掘,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;本文是《Python数据分析与挖掘实战》的读书笔记。作者：张良均；王路；谭立云；苏剑林等，机械工业出版社2016年1月第1版。">
+<meta name="keywords" content="读书笔记,数据挖掘">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《Python数据分析与挖掘实战》读书笔记">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/04/14/《Python数据分析与挖掘实战》读书笔记/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;本文是《Python数据分析与挖掘实战》的读书笔记。作者：张良均；王路；谭立云；苏剑林等，机械工业出版社2016年1月第1版。">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://lijiaweinpc.github.io/myblog/2018/04/14/《Python数据分析与挖掘实战》读书笔记/封面.png">
+<meta property="og:updated_time" content="2018-10-15T13:29:09.230Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《Python数据分析与挖掘实战》读书笔记">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;本文是《Python数据分析与挖掘实战》的读书笔记。作者：张良均；王路；谭立云；苏剑林等，机械工业出版社2016年1月第1版。">
+<meta name="twitter:image" content="https://lijiaweinpc.github.io/myblog/2018/04/14/《Python数据分析与挖掘实战》读书笔记/封面.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://lijiaweinpc.github.io/2018/04/14/《Python数据分析与挖掘实战》读书笔记/">
+
+
+
+
+
+  <title>《Python数据分析与挖掘实战》读书笔记 | VOID</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VOID</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2018/04/14/《Python数据分析与挖掘实战》读书笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="jiawei">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">《Python数据分析与挖掘实战》读书笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-14T14:24:45+08:00">
+                2018-04-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;<em>本文是《Python数据分析与挖掘实战》的读书笔记。作者：张良均；王路；谭立云；苏剑林等，机械工业出版社2016年1月第1版。</em></p>
+<a id="more"></a>
+<h1 id="第一章-数据挖掘基础"><a href="#第一章-数据挖掘基础" class="headerlink" title="第一章 数据挖掘基础"></a>第一章 数据挖掘基础</h1><p><strong>以餐饮企业为例管理系统有：</strong></p>
+<ul>
+<li>客户关系管理系统</li>
+<li>前厅管理系统</li>
+<li>后厨管理系统</li>
+<li>财务管理系统</li>
+<li>物资管理系统</li>
+</ul>
+<p><strong>数据挖掘的建模基础过程：</strong></p>
+<ul>
+<li>1.定义挖掘目标:任务理解；指标确定。</li>
+<li>2.数据采集：建模抽样（相关/可靠/有效）；质量把控；实时采集。</li>
+<li>3.数据整理：数据探索(是否达到了我们设想的要求，有没有规律趋势等)；数据清洗；数据变换。（预处理：数据筛选/变量转换/缺失值处理/坏数据处理/数据标准化/主成分分析/属性选择/数据规约等）</li>
+<li>4.构建模型：模式发现；构建模型；验证模型。（判断属于哪类问题：分类/聚类/关联规则/时序模式或者智能推荐）</li>
+<li>5.模型评价：设定评价标准；多模型对比；模型优化。</li>
+<li>6.模型发布：模型部署；模型重构。</li>
+</ul>
+<h1 id="第二章-Python数据分析简介"><a href="#第二章-Python数据分析简介" class="headerlink" title="第二章 Python数据分析简介"></a>第二章 Python数据分析简介</h1><p>python自带四种数据结构：列表（[],可以修改），元祖（（），不可修改）；字典（{},自定义键值对），集合（{}/set(),元素不重复且不支持索引）。</p>
+<ul>
+<li>Numpy:数组</li>
+<li>Scipy:科学计算；线代/积分/差值/拟合/傅立叶变换……</li>
+<li>Matplotlib:绘图可视</li>
+<li>Pandas：……（基石）</li>
+<li>StatsModels:着眼数据读取处理和探索（这个sk-learn也已经很优秀吧，回头再研究）</li>
+<li>Scikit-Learn:……机器学习……（基石）</li>
+<li>Keras:sk-learn不包含的人工神经网络，需要Theano搭建是他的简化。（深度后期还是优先考虑Tensorflow了）</li>
+<li>Genism:自然语言处理，包含了Word2Vec</li>
+</ul>
+<h1 id="第三章-数据探索"><a href="#第三章-数据探索" class="headerlink" title="第三章 数据探索"></a>第三章 数据探索</h1><p>1.数据质量分析：</p>
+<ul>
+<li>缺失值：字段和记录；</li>
+<li>异常值：describe()统计，3sigma原则，箱型图分析，注意重视分析异常值出现的原因；</li>
+<li>一致性分析：多数据源集成时没有一致更新。</li>
+</ul>
+<p>2.数据特征分析：</p>
+<ul>
+<li>分布分析：定量变量（频率分布分析：求极差-&gt;确定组距组数-&gt;分点-&gt;列表绘图）；定性变量（按变量类型分组）</li>
+<li>对比分析：绝对数对比；相对数（比例数，完成度等）对比</li>
+<li>统计量分析：集中趋势度量（均值，中位数，众数）；离中趋势度量（极差，标准差，变异系数）</li>
+<li>周期性分析</li>
+<li>贡献度分析(我这边3.6案例代码中的sort应该改sort_values,pyplot中文图例乱码回头再说)</li>
+<li>相关性分析：散点图，计算相关系数data.corr()</li>
+</ul>
+<h1 id="第四章-数据预处理"><a href="#第四章-数据预处理" class="headerlink" title="第四章 数据预处理"></a>第四章 数据预处理</h1><p>1.数据清洗：</p>
+<ul>
+<li>缺失处理：均值，中位数……拉格朗日，牛顿法插值；</li>
+<li>异常处理：删除，缺失插值，前后插值，不处理。</li>
+</ul>
+<p>2.数据集成</p>
+<p>3.数据变换：数据规范化处理，方便挖掘算法</p>
+<ul>
+<li>简单函数变换：平方，开方，对数，差分；</li>
+<li>规范化：最小最大规范化(映射到[0,1])，零均值规范化(均值0标准差1)，小数定标规范化（移动小数位映射到[-1,1]）</li>
+<li>连续属性离散化：等宽，等频，（一维）聚类。代码4-3聚类分析的算法我没有跑出来，对机器性能要求较高源数据才900多个此方法需注意尽量不使用，在自定义的作图函数cluster_plot中有一句有意思的代码：<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">0</span>, k):</span><br><span class="line">    <span class="comment">#data[d==j]所有为j标签的点的data真实值做横坐标，[j for i in d[d==j]]对应的纵坐标都为j，d[d==j]该标签有多少个点就有多少个j做纵坐标</span></span><br><span class="line">    plt.plot(data[d==j], [j <span class="keyword">for</span> i <span class="keyword">in</span> d[d==j]], <span class="string">'o'</span>)</span><br></pre></td></tr></table></figure></li>
+<li>属性构造：这个我觉得就要具体问题具体看了，为提高挖掘结果精度，构造新的属性。</li>
+<li>小波变换：非平稳信号分解为表达不同层次、不同频带信息的数据序列-&gt;小波系数</li>
+</ul>
+<p>4.数据规约</p>
+<p>通过直接删除不相关的属性（维）来减少数据维度，提高挖掘效率。</p>
+<ul>
+<li>属性规约：合并、逐步添加删除、决策树归纳、主成分分析</li>
+<li>数值规约</li>
+</ul>
+<p>5.Python主要数据预处理函数</p>
+<p>interpolate(Scipy下插值库)、unique（drop_duplicate()）、isnull/notnull、PCA、random</p>
+<h1 id="第五章-挖掘建模"><a href="#第五章-挖掘建模" class="headerlink" title="第五章 挖掘建模"></a>第五章 挖掘建模</h1><p>1.分类与预测：回归、决策树、人工神经网络、贝叶斯网络、支持向量机</p>
+<ul>
+<li>逻辑回归：随机逻辑回归特征筛选RandomizedLogisticRegression然后get_support()，建立模型LogisticRegression</li>
+<li>决策树：信息熵DTC(criterion=’entropy’),在每个非叶子节点上的类别划分获得最大的增益</li>
+<li>人工神经网络：Keras看起来也比较简单，Sequetial(),model.add(),compile(),fit()…</li>
+<li>分类器评价：混淆矩阵：loc[i,j]=模式i被判断为模式j的百分率所以有正确率loc[i,i]…</li>
+</ul>
+<p>2.聚类分析</p>
+<ul>
+<li>K-Means：预定聚成K类，选取各类中心，按距离分配所有对象；分配完后重新计算各类中心，再聚类，重复动作直到质心不再改变；sklearn.cluster Kmeans</li>
+<li>聚类结果可视化——sklearn.manifold TSNE,也可以高维数据降维fit_transform()</li>
+</ul>
+<p>3.关联分析</p>
+<p>Apriori和FP-growth，现在的工作正好和这个相关，随后专文细聊</p>
+<p>4.时序模式</p>
+<p>金融交易常用的时间序列分析，随后细聊。ARIMA,StatsModels()</p>
+<p>5.离群点检测</p>
+<p>基于统计、邻近度、密度、聚类等</p>
+<p>异常点这个问题我觉得还是要小心，从之前做的货期稳定性分析的一个项目中明显可以感觉到，每一个异常点还是要与业务进行详细的确认之后，商议处理的具体方案。</p>
+<h1 id="第六章-电力窃漏电用户自动识别"><a href="#第六章-电力窃漏电用户自动识别" class="headerlink" title="第六章 电力窃漏电用户自动识别"></a>第六章 电力窃漏电用户自动识别</h1><p><strong>目标：</strong></p>
+<ul>
+<li>归纳出窃漏电用户的关键特征，构建窃漏电用户的识别模型。</li>
+<li>利用实时监测的数据，调用窃漏电用户识别模型实现实时诊断。</li>
+</ul>
+<p><strong>分析过程：</strong></p>
+<ul>
+<li>数据抽取：某市208用户5年数据，同时包含每天是否窃漏电标识。</li>
+<li>探索分析：分布来看非居民没有窃漏电情况；周期性看窃漏电用户会出现震荡下行。</li>
+<li>数据预处理：清洗掉非居民和节假日；缺失值采用Lagrange插值处理；数据变换。</li>
+<li>构建专家样本：根据定义的关键指标体系，处理选取样本形成专家库。</li>
+</ul>
+<p><strong>窃漏电评价体系：</strong></p>
+<p>在本案例数据变换部分，定义了表征窃漏电行为规律的指标体系：</p>
+<ul>
+<li>电量趋势下降指标：计算前后各五日中电量趋势下降的总天数；</li>
+<li>线损指标：前后五日的线损率变动率（这里明显会有未来函数，但想想窃漏电识别的实时性要求不高，就是使用模型的时候要注意最后几日的判断不可靠就好），漏窃电会导致当天的线损率上升，上升1%有漏窃电嫌疑；</li>
+<li>告警类指标：漏窃相关报警次数总和。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<p>本案例中采用LM神经网络和CART决策树来构建了分类模型，随机选取20%测试，80%训练。</p>
+<ul>
+<li>LM神经网络模型（6-3）</li>
+<li>CART决策树模型（6-4）</li>
+</ul>
+<p><strong>模型评价</strong></p>
+<ul>
+<li>混淆矩阵评价</li>
+<li>绘制ROC曲线</li>
+</ul>
+<h1 id="第七章-航空公司客户价值分析"><a href="#第七章-航空公司客户价值分析" class="headerlink" title="第七章 航空公司客户价值分析"></a>第七章 航空公司客户价值分析</h1><p><strong>目标：</strong></p>
+<ul>
+<li>借助航空公司的客户数据对客户进行分类。</li>
+<li>分类客户进行特征分析，比较不同客户的价值。</li>
+<li>制定差异化的营销策略。</li>
+</ul>
+<p><strong>客户价值识别模型指标：</strong></p>
+<ul>
+<li>广泛应用的客户价值RFM模型：消费时间间隔（Recency）、消费频率（Frequency）、消费金额（Monetary）。每个维度按高低分就会产生8个区域对应着不同的策略。</li>
+<li>本案例扩展的LRFMC模型：Lenth?(入会时长几个月)、Recent?(最近乘机是几月前)、Frequency(频率)、Miles？(飞行的总里程)、cost？(折扣系数均值)</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>对五个指标做标准差标准化；</li>
+<li>调用K-means来实现聚类分群，K=5这里需要由业务来理解和敲定。</li>
+</ul>
+<h1 id="第八章-中医证型关联规则挖掘"><a href="#第八章-中医证型关联规则挖掘" class="headerlink" title="第八章 中医证型关联规则挖掘"></a>第八章 中医证型关联规则挖掘</h1><p><strong>目标：</strong></p>
+<ul>
+<li>挖掘症状与中医证型之间的关联关系。</li>
+<li>挖掘潜在的证素。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>本案例使用了问卷分析的方式，以及数据离散化的方法（8-1）。离散化是为了使用apriori算法。</li>
+<li>apriori，挖掘频繁项关联关系。输出support和confidence。</li>
+</ul>
+<h1 id="第九章-基于水色图像的水质评价"><a href="#第九章-基于水色图像的水质评价" class="headerlink" title="第九章 基于水色图像的水质评价"></a>第九章 基于水色图像的水质评价</h1><p><strong>目标：</strong></p>
+<ul>
+<li>利用图像处理急速，通过水色图像实现水质自动评价。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>特征提取采用的是一、二、三阶颜色矩，分别可以反映到图像的明暗程度、颜色分布范围以及颜色分布对称性。</li>
+<li>模型调用了svm支持向量机</li>
+</ul>
+<h1 id="第十章-家用电器用户行为分析与事件识别"><a href="#第十章-家用电器用户行为分析与事件识别" class="headerlink" title="第十章 家用电器用户行为分析与事件识别"></a>第十章 家用电器用户行为分析与事件识别</h1><p><strong>目标：</strong></p>
+<ul>
+<li>根据热水器采集到的数据，划分一次完整的用水事件。</li>
+<li>在划分好的一次完整用水事件中识别出洗浴。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>对历史用水数据进行选择性抽取，构建专家样本。</li>
+<li>以没有水流为界划分用水事件，针对没有水流的时间阈值进行优化设计（考虑用户的停顿习惯）。</li>
+<li>筛选短暂用水的事件，包括时长和水量等条件。</li>
+<li>采用多层神经网络建立识别模型。</li>
+</ul>
+<h1 id="第十一章-应用系统负载分析与磁盘容量预测"><a href="#第十一章-应用系统负载分析与磁盘容量预测" class="headerlink" title="第十一章 应用系统负载分析与磁盘容量预测"></a>第十一章 应用系统负载分析与磁盘容量预测</h1><p><strong>目标：</strong></p>
+<ul>
+<li>预测服务器磁盘已使用空间大小。</li>
+<li>设置不同预警等级，为管理员提供定制化预警提示。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>采用时间序列分析，预测服务器磁盘使用情况。</li>
+<li>平稳性检验，diff ADF。</li>
+<li>ARIMA(0,1,1)。</li>
+</ul>
+<h1 id="第十二章-电子商务网站用户行为分析及服务推荐"><a href="#第十二章-电子商务网站用户行为分析及服务推荐" class="headerlink" title="第十二章 电子商务网站用户行为分析及服务推荐"></a>第十二章 电子商务网站用户行为分析及服务推荐</h1><p><strong>目标：</strong></p>
+<ul>
+<li>按地域研究用户访问时间、内容和访问次数等，了解用户的访问行为关心的内容。</li>
+<li>借助用户访问记录，发现用户习惯，进行推荐。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>访问数据库sqlalchemy。</li>
+<li>用jaccard相似公式计算两两物品的相似度矩阵（先转换为了0-1矩阵）。</li>
+<li>按相似度计算用户兴趣度，获得推荐结果。</li>
+</ul>
+<h1 id="第十三章-财政收入影响因素分析及预测模型"><a href="#第十三章-财政收入影响因素分析及预测模型" class="headerlink" title="第十三章 财政收入影响因素分析及预测模型"></a>第十三章 财政收入影响因素分析及预测模型</h1><p><strong>目标：</strong></p>
+<ul>
+<li>梳理影响地方财政收入的关键特征、分析、识别构建模型，预测财政收入。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>灰色预测与神经网络组合模型。</li>
+<li>Adaptive-Lasso及逆行变量选择，然后根据识别的因素建立神经网络。</li>
+</ul>
+<h1 id="第十四章-基于基站定位数据的商圈分析"><a href="#第十四章-基于基站定位数据的商圈分析" class="headerlink" title="第十四章 基于基站定位数据的商圈分析"></a>第十四章 基于基站定位数据的商圈分析</h1><p><strong>目标：</strong></p>
+<ul>
+<li>用用户历史定位数据对基站进行分群。</li>
+<li>不同商圈分群的特征分析没比较商圈类别价值，选择合适的促销活动。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>使用离差标准化来消除数量级使各属性差异较大。</li>
+<li>使用层次聚类，画出谱系聚类图，据此确定聚类数量k=3（这里没有说聚类完毕应该是没有验证稳定吧）。层次聚类AggiomerativeClustering,并分别作图。</li>
+</ul>
+<h1 id="第十五章-电商产品评论数据情感分析"><a href="#第十五章-电商产品评论数据情感分析" class="headerlink" title="第十五章 电商产品评论数据情感分析"></a>第十五章 电商产品评论数据情感分析</h1><p><strong>目标：</strong></p>
+<ul>
+<li>用户评论挖掘。</li>
+<li>分析用户情感倾向，提炼热水器卖点。</li>
+</ul>
+<p><strong>模型构建</strong></p>
+<ul>
+<li>用八爪鱼采集器爬去京东上美的热水器评论数据。</li>
+<li>文本去重，jieba分词，LDA主题分析，得到好评和差评的潜在主题并作出评价建议。</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>&emsp;&emsp;基础篇就不多说了，从研读第六章起我感觉，这本书在提供框架思路上是很不错的，但是很多地方讲的并不是特别细致，这也是当然的，其实每个案例搞清楚了背后的技术细节都能展开成一本书，而本书更多的是展示mining的各种可解决的问题和处理方法，当做一个指导备查提供思路的手册非常好。</p>
+<p>&emsp;&emsp;问题与关键方法小结：</p>
+<ul>
+<li>分类识别问题：第六章（LM神经网络，CART决策树），第九章（svm），第十章（多层神经网络），第十三章（Adaptive-Lasso，该方法可以自动剔除共线性）</li>
+<li>聚类问题：第七章（K-means），第十四章（层次聚类，谱系聚类图等可视）</li>
+<li>关联分析：第八章（Apriori），第十二章（相似度推荐）</li>
+<li>时间序列：第十一章（ARIMA）</li>
+<li>文本挖掘NLP：第十五章（jieba）</li>
+</ul>
+<img src="/myblog/2018/04/14/《Python数据分析与挖掘实战》读书笔记/封面.png">
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+            <a href="/tags/数据挖掘/" rel="tag"># 数据挖掘</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/05/机器视觉运动控制系列3：摄像头控制舵机小记/" rel="next" title="机器视觉运动控制系列3：摄像头控制舵机小记">
+                <i class="fa fa-chevron-left"></i> 机器视觉运动控制系列3：摄像头控制舵机小记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/22/《以太坊入门三篇》学习札记/" rel="prev" title="《以太坊入门三篇》学习札记">
+                《以太坊入门三篇》学习札记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="jiawei">
+            
+              <p class="site-author-name" itemprop="name">jiawei</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://gitee.com/npc_li" target="_blank" title="Gitee">
+                      
+                        <i class="fa fa-fw fa-github"></i>Gitee</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:npc_li@163.com" target="_blank" title="Email">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>Email</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章-数据挖掘基础"><span class="nav-number">1.</span> <span class="nav-text">第一章 数据挖掘基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-Python数据分析简介"><span class="nav-number">2.</span> <span class="nav-text">第二章 Python数据分析简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第三章-数据探索"><span class="nav-number">3.</span> <span class="nav-text">第三章 数据探索</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第四章-数据预处理"><span class="nav-number">4.</span> <span class="nav-text">第四章 数据预处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第五章-挖掘建模"><span class="nav-number">5.</span> <span class="nav-text">第五章 挖掘建模</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第六章-电力窃漏电用户自动识别"><span class="nav-number">6.</span> <span class="nav-text">第六章 电力窃漏电用户自动识别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第七章-航空公司客户价值分析"><span class="nav-number">7.</span> <span class="nav-text">第七章 航空公司客户价值分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第八章-中医证型关联规则挖掘"><span class="nav-number">8.</span> <span class="nav-text">第八章 中医证型关联规则挖掘</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第九章-基于水色图像的水质评价"><span class="nav-number">9.</span> <span class="nav-text">第九章 基于水色图像的水质评价</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十章-家用电器用户行为分析与事件识别"><span class="nav-number">10.</span> <span class="nav-text">第十章 家用电器用户行为分析与事件识别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十一章-应用系统负载分析与磁盘容量预测"><span class="nav-number">11.</span> <span class="nav-text">第十一章 应用系统负载分析与磁盘容量预测</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十二章-电子商务网站用户行为分析及服务推荐"><span class="nav-number">12.</span> <span class="nav-text">第十二章 电子商务网站用户行为分析及服务推荐</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十三章-财政收入影响因素分析及预测模型"><span class="nav-number">13.</span> <span class="nav-text">第十三章 财政收入影响因素分析及预测模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十四章-基于基站定位数据的商圈分析"><span class="nav-number">14.</span> <span class="nav-text">第十四章 基于基站定位数据的商圈分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第十五章-电商产品评论数据情感分析"><span class="nav-number">15.</span> <span class="nav-text">第十五章 电商产品评论数据情感分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">16.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">jiawei</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('10');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":100,"height":200},"mobile":{"show":true},"log":false});</script></body>
+</html>
