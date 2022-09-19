@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"lijiaweinpc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="几个月前，boss想要做的一个项目中有这样一系列的需求，使用摄像头捕获特定的人脸目标，然后控制机械臂追随目标移动并定时拍下照片，这一机器视觉运动控制系列是整理当时部分代码的重现。为了快速的实现这一目标的原型我首先寻找了一下人脸识别的实现方式，对face_recognition做了较多研究，本文是这一部分工作的记录。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器视觉运动控制系列1：face_recognition研究笔记">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/04/02/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="几个月前，boss想要做的一个项目中有这样一系列的需求，使用摄像头捕获特定的人脸目标，然后控制机械臂追随目标移动并定时拍下照片，这一机器视觉运动控制系列是整理当时部分代码的重现。为了快速的实现这一目标的原型我首先寻找了一下人脸识别的实现方式，对face_recognition做了较多研究，本文是这一部分工作的记录。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lijiaweinpc.github.io/static/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/%E5%9C%A8%E5%9B%BE%E7%89%87%E4%B8%AD%E6%89%BE%E4%BA%BA%E8%84%B8.jpg">
+<meta property="og:image" content="https://lijiaweinpc.github.io/static/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/%E5%9C%A8%E8%A7%86%E9%A2%91%E4%B8%AD%E6%89%BE%E4%BA%BA%E8%84%B8.jpg">
+<meta property="article:published_time" content="2018-04-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-19T14:19:06.356Z">
+<meta property="article:author" content="Jiawei">
+<meta property="article:tag" content="图像识别">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lijiaweinpc.github.io/static/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/%E5%9C%A8%E5%9B%BE%E7%89%87%E4%B8%AD%E6%89%BE%E4%BA%BA%E8%84%B8.jpg">
+
+
+<link rel="canonical" href="https://lijiaweinpc.github.io/2018/04/02/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://lijiaweinpc.github.io/2018/04/02/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/","path":"2018/04/02/机器视觉运动控制系列1：face_recognition研究笔记/","title":"机器视觉运动控制系列1：face_recognition研究笔记"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>机器视觉运动控制系列1：face_recognition研究笔记 | VOID</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">VOID</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jiawei"
+      src="/static/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jiawei</p>
+  <div class="site-description" itemprop="description">Jiawei的小屋</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lijiaweinpc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lijiaweinpc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:npc_li@163.com" title="E-Mail → mailto:npc_li@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2018/04/02/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/static/avatar.jpg">
+      <meta itemprop="name" content="Jiawei">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+      <meta itemprop="description" content="Jiawei的小屋">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="机器视觉运动控制系列1：face_recognition研究笔记 | VOID">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          机器视觉运动控制系列1：face_recognition研究笔记
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-04-02 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-02T00:00:00+08:00">2018-04-02</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>  几个月前，boss想要做的一个项目中有这样一系列的需求，使用摄像头捕获特定的人脸目标，然后控制机械臂追随目标移动并定时拍下照片，这一机器视觉运动控制系列是整理当时部分代码的重现。为了快速的实现这一目标的原型我首先寻找了一下人脸识别的实现方式，对face_recognition做了较多研究，本文是这一部分工作的记录。</p>
+<span id="more"></span>
+<p>  face_recognition是非常流行的一个人脸识别项目，repo在这里：<br />
+<strong>ageitgey</strong>：<a target="_blank" rel="noopener" href="https://github.com/ageitgey/face_recognition">github.com/ageitgey/face_recognition</a></p>
+<p>  当时小项目的第一步是想要在摄像头中识别出人脸，比较了几个库后face_recognition的介绍比较贴切也好实现，就对他研究比较多。昨天重新搭环境莫名的不顺利，所以也记下过程备查。face_recognition依赖dlib，直接下载dlib提示需要cmake，而cmake又需要vs，装了vs2017 conmunity，确定支持cmake编译时突然回忆起自己之前不是这么麻烦搞的吧，才想起时pypi上的dlib。。。得嘞这也省事，所以直接pypi上下载然后install搞定，之后pip安装face_recognition，opencv-python，部署完成。</p>
+<p>  配置好了环境之后按照face_recognition的example，<a target="_blank" rel="noopener" href="http://xn--benchmark-u75nzdy56bbq9r.py">先跑一下benchmark.py</a><strong>看一下机器的能力：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">All benchmarks are only using a single CPU core</span><br><span class="line">Timings at 240p:</span><br><span class="line"> - Face locations: 0.0839s (11.91 fps)</span><br><span class="line"> - Face landmarks: 0.0040s (248.42 fps)</span><br><span class="line"> - Encode face (inc. landmarks): 0.0392s (25.51 fps)</span><br><span class="line"> - End-to-end: 0.1322s (7.56 fps)</span><br><span class="line"></span><br><span class="line">Timings at 480p:</span><br><span class="line"> - Face locations: 0.3263s (3.06 fps)</span><br><span class="line"> - Face landmarks: 0.0041s (246.16 fps)</span><br><span class="line"> - Encode face (inc. landmarks): 0.0337s (29.68 fps)</span><br><span class="line"> - End-to-end: 0.4032s (2.48 fps)</span><br><span class="line"></span><br><span class="line">Timings at 720p:</span><br><span class="line"> - Face locations: 0.7467s (1.34 fps)</span><br><span class="line"> - Face landmarks: 0.0041s (246.80 fps)</span><br><span class="line"> - Encode face (inc. landmarks): 0.0353s (28.33 fps)</span><br><span class="line"> - End-to-end: 0.8286s (1.21 fps)</span><br></pre></td></tr></table></figure>
+<p>  可以看到Face locations随着图片分辨率的提高效率明显下降，而对应的<strong>Face landmarks</strong>几乎没有什么影响，这也是我一直想还是研究使用特征来追踪的原因，靠调Face locations来实时定位的效果太差了。</p>
+<p>  <strong>下面记录一些当时和example不太一样的实现：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在一张图片里找多个人的人脸，之前测试时发现识别率有待提高，存在较多的误认；</span></span><br><span class="line"><span class="comment">#参考了identify_and_draw_boxes_on_faces.py</span></span><br><span class="line"><span class="comment">#face_recognition可以计算两张照片的相似度，见example/face_distance.py</span></span><br><span class="line"><span class="keyword">import</span> face_recognition</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line"><span class="comment">#在这张frame里的识别人脸</span></span><br><span class="line">frame = cv2.imread(<span class="string">&quot;two_people.jpg&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#识别哪些人脸，每人给一张就可以了</span></span><br><span class="line">obama_image = face_recognition.load_image_file(<span class="string">&quot;obama.jpg&quot;</span>)</span><br><span class="line">obama_face_encoding = face_recognition.face_encodings(obama_image)[<span class="number">0</span>]</span><br><span class="line">biden_image = face_recognition.load_image_file(<span class="string">&quot;biden.jpg&quot;</span>)</span><br><span class="line">biden_face_encoding = face_recognition.face_encodings(biden_image)[<span class="number">0</span>]</span><br><span class="line">known_face_encodings = [</span><br><span class="line">    obama_face_encoding,</span><br><span class="line">    biden_face_encoding]</span><br><span class="line">known_face_names = [</span><br><span class="line">    <span class="string">&quot;Obama&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Joe Biden&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">#找到frame中的所有人脸</span></span><br><span class="line">face_locations = face_recognition.face_locations(frame)</span><br><span class="line">face_encodings = face_recognition.face_encodings(frame, face_locations)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;I found &#123;&#125; face(s) in this photograph.&quot;</span>.<span class="built_in">format</span>(<span class="built_in">len</span>(face_locations)))</span><br><span class="line"></span><br><span class="line"><span class="comment">#在找到的人脸旁边做标注</span></span><br><span class="line"><span class="keyword">for</span> (top, right, bottom, left), face_encoding <span class="keyword">in</span> <span class="built_in">zip</span>(face_locations, face_encodings):</span><br><span class="line">    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)</span><br><span class="line">    name = <span class="string">&quot;Unknown&quot;</span></span><br><span class="line">    <span class="comment">#画个框把脸框起来</span></span><br><span class="line">    cv2.rectangle(frame, (left, top), (right, bottom), (<span class="number">0</span>, <span class="number">255</span>, <span class="number">0</span>), <span class="number">2</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#把人名读出来，这里如果排在靠后位置的是个大众脸，那误识可就高了</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(known_face_names)):</span><br><span class="line">        <span class="keyword">if</span> matches[i]:name = known_face_names[i]</span><br><span class="line">        <span class="keyword">else</span>:<span class="keyword">pass</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">#画个标签框里面写上找到的人的名字</span></span><br><span class="line">    cv2.rectangle(frame, (left, bottom - <span class="number">35</span>), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), cv2.FILLED)</span><br><span class="line">    font = cv2.FONT_HERSHEY_DUPLEX</span><br><span class="line">    cv2.putText(frame, name, (left + <span class="number">6</span>, bottom - <span class="number">6</span>), font, <span class="number">1.0</span>, (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#输出</span></span><br><span class="line">cv2.imwrite(<span class="string">&quot;find.jpg&quot;</span>,frame)</span><br></pre></td></tr></table></figure>
+<p><img src="/static/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/%E5%9C%A8%E5%9B%BE%E7%89%87%E4%B8%AD%E6%89%BE%E4%BA%BA%E8%84%B8.jpg" alt="" title="输出的find.jpg，可预设多人仅需要提供每人一张照片" /></p>
+<p>  <strong>下来看如何从一个视频里找到目标的人脸：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从视频中找到人脸,可以参考example/facerec_from_video_file.py，它是整体输出到output.avi里。</span></span><br><span class="line"><span class="comment">#这里我实时播放出来，并把截图保存下来</span></span><br><span class="line"><span class="keyword">import</span> face_recognition</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line"><span class="comment">#在这个视频里识别人脸</span></span><br><span class="line">video_capture = cv2.VideoCapture(<span class="string">&quot;hamilton_clip.mp4&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#找这个人脸</span></span><br><span class="line">obama_image = face_recognition.load_image_file(<span class="string">&quot;lin-manuel-miranda.png&quot;</span>)</span><br><span class="line">obama_face_encoding = face_recognition.face_encodings(obama_image)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">#num用来为存储的截图计数命名</span></span><br><span class="line">num = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="comment">#切片得到一张截图</span></span><br><span class="line">    ret, frame = video_capture.read()</span><br><span class="line"></span><br><span class="line">    <span class="comment">#这个地方注意CV2颜色顺序的一个坑，他是BGR，这里转成RGB</span></span><br><span class="line">    rgb_frame = frame[:, :, ::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment">#找人脸</span></span><br><span class="line">    face_locations = face_recognition.face_locations(rgb_frame)</span><br><span class="line">    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#在找到的人脸旁做标注</span></span><br><span class="line">    <span class="keyword">for</span> (top, right, bottom, left), face_encoding <span class="keyword">in</span> <span class="built_in">zip</span>(face_locations, face_encodings):</span><br><span class="line">        <span class="keyword">match</span> = face_recognition.compare_faces([obama_face_encoding], face_encoding)</span><br><span class="line"></span><br><span class="line">        name = <span class="string">&quot;Unknown&quot;</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">match</span>[<span class="number">0</span>]:</span><br><span class="line">            name = <span class="string">&quot;miranda&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">#在截图上打个标签，先写人名吧，表示处理过，将来可扩展处理方式</span></span><br><span class="line">        cv2.putText(frame, name, (<span class="number">50</span>, <span class="number">150</span>), cv2.FONT_HERSHEY_COMPLEX, <span class="number">1</span>, (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line">        <span class="comment">#把截图存下来,要建一下output文件夹不然报错找不到路径</span></span><br><span class="line">        num = num + <span class="number">1</span></span><br><span class="line">        filename = <span class="string">&quot;output\\frames_%s.jpg&quot;</span> % num</span><br><span class="line">        cv2.imwrite(filename, frame)</span><br><span class="line"></span><br><span class="line">        <span class="comment">#画个框把脸框起来</span></span><br><span class="line">        cv2.rectangle(frame, (left, top), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment">#画个标签框里面写上找到的人的名字</span></span><br><span class="line">        cv2.rectangle(frame, (left, bottom - <span class="number">35</span>), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), cv2.FILLED)</span><br><span class="line">        font = cv2.FONT_HERSHEY_DUPLEX</span><br><span class="line">        cv2.putText(frame, name, (left + <span class="number">6</span>, bottom - <span class="number">6</span>), font, <span class="number">1.0</span>, (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#实时展示</span></span><br><span class="line">    cv2.imshow(<span class="string">&#x27;Video&#x27;</span>, frame)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Hit &#x27;q&#x27; on the keyboard to quit!</span></span><br><span class="line">    <span class="keyword">if</span> cv2.waitKey(<span class="number">1</span>) &amp; <span class="number">0xFF</span> == <span class="built_in">ord</span>(<span class="string">&#x27;q&#x27;</span>):</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Release</span></span><br><span class="line">video_capture.release()</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+<p><img src="/static/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%971%EF%BC%9Aface_recognition%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/%E5%9C%A8%E8%A7%86%E9%A2%91%E4%B8%AD%E6%89%BE%E4%BA%BA%E8%84%B8.jpg" alt="" title="上为运行展示，下为保存的截图" /></p>
+<p>  <strong>在上段代码中修改一句源就可以变成从摄像头展开识别了：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从摄像头里识别人脸</span></span><br><span class="line">video_capture = cv2.VideoCapture(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>  但是使用这段代码来进行摄像头的实时识别体验比较差，笔者的电脑像看ppt一样，face_recognition也给出了一个优化的方案，思路是把视频源进行缩放，然后隔一帧做一次识别，牺牲一定的识别范围（实测缩放后可以识别的距离在一米到一米五之间，当然我想与我的摄像头性能也有关系），提高识别的效率。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从摄像头中找到人脸,参考facerec_from_webcam_faster.py</span></span><br><span class="line"><span class="comment">#实时播放出来，打水印并把截图保存下来</span></span><br><span class="line"><span class="keyword">import</span> face_recognition</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line">video_capture = cv2.VideoCapture(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#找这些人脸</span></span><br><span class="line">obama_image = face_recognition.load_image_file(<span class="string">&quot;obama.jpg&quot;</span>)</span><br><span class="line">obama_face_encoding = face_recognition.face_encodings(obama_image)[<span class="number">0</span>]</span><br><span class="line">lijiawei_image = face_recognition.load_image_file(<span class="string">&quot;lijiawei.jpg&quot;</span>)</span><br><span class="line">lijiawei_face_encoding = face_recognition.face_encodings(lijiawei_image)[<span class="number">0</span>]</span><br><span class="line">known_face_encodings = [</span><br><span class="line">    obama_face_encoding,</span><br><span class="line">    lijiawei_face_encoding]</span><br><span class="line">known_face_names = [</span><br><span class="line">    <span class="string">&quot;Obama&quot;</span>,</span><br><span class="line">    <span class="string">&quot;lijiawei&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">#num用来为存储的截图计数命名</span></span><br><span class="line">num = <span class="number">0</span></span><br><span class="line"><span class="comment">#process_this_frame确定这一帧是否进行识别</span></span><br><span class="line">process_this_frame = <span class="literal">True</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="comment">#切片得到一张截图</span></span><br><span class="line">    ret, frame = video_capture.read()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#在这里把视频缩放到只有1/4*1/4，调整RGB</span></span><br><span class="line">    small_frame = cv2.resize(frame, (<span class="number">0</span>, <span class="number">0</span>), fx=<span class="number">0.25</span>, fy=<span class="number">0.25</span>)</span><br><span class="line">    rgb_small_frame = small_frame[:, :, ::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment">#隔一帧做一次识别</span></span><br><span class="line">    <span class="keyword">if</span> process_this_frame:</span><br><span class="line">        face_locations = face_recognition.face_locations(rgb_small_frame)</span><br><span class="line">        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)</span><br><span class="line">    process_this_frame = <span class="keyword">not</span> process_this_frame</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#呈现与保存</span></span><br><span class="line">    <span class="keyword">for</span> (top, right, bottom, left), face_encoding <span class="keyword">in</span> <span class="built_in">zip</span>(face_locations, face_encodings):</span><br><span class="line">        <span class="comment">#将缩放还原</span></span><br><span class="line">        top *= <span class="number">4</span></span><br><span class="line">        right *= <span class="number">4</span></span><br><span class="line">        bottom *= <span class="number">4</span></span><br><span class="line">        left *= <span class="number">4</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">#找人名</span></span><br><span class="line">        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)</span><br><span class="line">        name = <span class="string">&quot;Unknown&quot;</span>        </span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(known_face_names)):</span><br><span class="line">            <span class="keyword">if</span> matches[i]:name = known_face_names[i]</span><br><span class="line">            <span class="keyword">else</span>:<span class="keyword">pass</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">#打水印保存截图</span></span><br><span class="line">        cv2.putText(frame, <span class="string">&quot;cam&quot;</span>, (<span class="number">50</span>,<span class="number">100</span>), cv2.FONT_HERSHEY_DUPLEX, <span class="number">1</span>, (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line">        num = num + <span class="number">1</span></span><br><span class="line">        filename = <span class="string">&quot;output/frames_%s.jpg&quot;</span> % num</span><br><span class="line">        cv2.imwrite(filename, frame)</span><br><span class="line">                  </span><br><span class="line">        <span class="comment">#实时展示画个框把脸框起来，画个标签框里面写上找到的人的名字</span></span><br><span class="line">        cv2.rectangle(frame, (left, top), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">2</span>)</span><br><span class="line">        cv2.rectangle(frame, (left, bottom - <span class="number">35</span>), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), cv2.FILLED)</span><br><span class="line">        font = cv2.FONT_HERSHEY_DUPLEX</span><br><span class="line">        cv2.putText(frame, name, (left + <span class="number">6</span>, bottom - <span class="number">6</span>), font, <span class="number">1.0</span>, (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line">                </span><br><span class="line">    <span class="comment">#实时展示</span></span><br><span class="line">    cv2.imshow(<span class="string">&#x27;Video&#x27;</span>, frame)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Hit &#x27;q&#x27; on the keyboard to quit!</span></span><br><span class="line">    <span class="keyword">if</span> cv2.waitKey(<span class="number">1</span>) &amp; <span class="number">0xFF</span> == <span class="built_in">ord</span>(<span class="string">&#x27;q&#x27;</span>):</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">#Release</span></span><br><span class="line">video_capture.release()</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+<p>  至此我们就有了一个可以快速实现计算机识别的人脸的方案了。包含从一个照片中找到多人；从视频中找到某人并实时打水印和保存截图，以及从摄像头中找到多人。使用face_recognition，目标只需要提供一张照片就可以了，它很简单但是精确性上自然有些牺牲，如果要识别侧脸，识别物体运动轨迹（这个小项目当时的需求是要能识别脸部运动轨迹的），使用face_recognition可能就不是很合适了，具体解决方案有待于以后有机会再研究。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E8%AF%86%E5%88%AB/" rel="tag"># 图像识别</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/03/19/%E5%9F%BA%E4%BA%8E%E8%89%B2%E5%8D%A1%E6%9B%BF%E6%8D%A2%E7%9A%84%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB/" rel="prev" title="基于色卡的替换风格迁移">
+                  <i class="fa fa-chevron-left"></i> 基于色卡的替换风格迁移
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/10/14/%E6%8D%A2%E5%9B%9Ewin10%E6%9B%B4%E6%96%B0%E5%8D%9A%E5%AE%A2hexo%E8%BF%81%E7%A7%BB/" rel="next" title="换回win10更新博客hexo迁移">
+                  换回win10更新博客hexo迁移 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiawei</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
