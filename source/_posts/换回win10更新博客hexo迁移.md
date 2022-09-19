@@ -14,7 +14,7 @@ tags:
 2.重新安装hexo：按顺序nodejs，git，hexo；  
 3.删除原blog的github SSH key重新建立，建立hexo和github连接过程参考这里的第5步：将Hexo与Github page联系起来，设置Git的user
 name和email和第6步：配置Deployment，在其文件夹中，找到_config.yml文件，修改repo值（在末尾）：
-**Z皓**[使用Hexo+Github一步步搭建属于自己的博客（基础）](https://www.cnblogs.com/fengxiongZz/p/7707219.html)  
+**Z皓**：[使用Hexo+Github一步步搭建属于自己的博客（基础）](https://www.cnblogs.com/fengxiongZz/p/7707219.html)  
 4.之后hexo g -d,OK了切换完成，原先的主题啊配置啊都没有变，就可以在win下更新啦。  
 5.hexo new 换回win10更新博客hexo迁移，发现没有node-sass，npm install
 node-sass提示需要python2，现在都3.6了可以用cnpm这样做：  
