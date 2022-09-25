@@ -1,0 +1,154 @@
+---
+title: 用Apriori挖掘关联规则
+date: 2018-11-20
+tags: 数据挖掘
+---
+
+&emsp;&emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。
+<!--more-->
+
+&emsp;&emsp;Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。举个例子：当support(
+A) &lt; support threshold，那显然会有support(A,B) &lt; support
+threshold，频繁项的子集必定是频繁项；所以当我们发现了这样一个A不满足我们挖掘所设置的支持度阈值的时候，所有涉及A的组合也不必再进行统计了。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。
+&emsp;&emsp;在找到了所有频繁项以及统计出支持度后，我们还会用关联度（其实还有提升度）来筛选生成规则。所谓规则，我们想要得到的insights是买了AB的人大概率会买C，这样我们就可以把C推荐给再来买AB的人……举个例子：就用上面的ABC，当我们发现了这个频繁集(
+A,B,C)之后，我们依次去检视以下规则的概率（即关联度）：
+&emsp;&emsp;(B,C) =&gt; A; (A,C) =&gt; B; (A,B) =&gt; C
+&emsp;&emsp;关联度需要：conf = P((A,B) =&gt; C) = P(A,B,C) / P(A,B) &gt; confidence threshold
+&emsp;&emsp;提升度需要：lift = P((A,B) =&gt; C) / P(C) &gt; lift threshold
+&emsp;&emsp;在上例中，支持度要求(A,B,C)首先是个频繁集，那么我们找到的并不是一个很小众的规则；关联度保证了买(A,B)
+组合的人大概率会买C，它是我们挖掘规则的直观价值；提升度的本质是相关性，若提升度很低(&lt;1)
+，买C的人本身就很多，任何情况你推荐买C都有道理，那这条规则也没有意义。
+&emsp;&emsp;在挖掘规则中，上例的情况很多时候大家会检视所有子集生成规则的概率，即还包括：
+&emsp;&emsp;A =&gt; (B,C); B =&gt; (A,C); C =&gt; (B,C)
+&emsp;&emsp;如果上升到(A,B,C,D)，更会有：A =&gt; (B,C,D); (A,B) =&gt; (C,D)……
+&emsp;&emsp;这样带来的问题是结果集非常的冗余，所以这里我只挖掘规则右边RHS只有一个item的规则，压缩结果同时也能提高算法和结果审视的效率。我在挖掘频繁项和生成规则中都加了进度打印(
+区间为整个过程的10%~90%)，格式是方便前台转为进度条呈现；每次打印都使用sys.stdout.flush()是为了作为文件被jython调用的话可以实时捕获到我的打印。
+
+```python
+# -*- coding: utf-8 -*-
+import pandas as pd
+import sys
+
+
+def c1_create(dataset):
+    """
+    将dataset中的所有单个部件A, B, C, D排序整理成[['A'], ['B'], ['C'], ['D']]，
+    返回时再转成frozenset, frozenset与set的区别是可以作为字典的键。
+    """
+    c1 = []
+    for transaction in dataset:
+        for item in transaction:
+            if not [item] in c1:
+                c1.append([item])
+    c1.sort()
+    return list(map(frozenset, c1))
+
+
+def apriori_gen(lk, k):
+    """由初始候选项集的集合Lk生成新的生成候选项集"""
+    retlist = []
+    lenlk = len(lk)
+    for i in range(lenlk):
+        for j in range(i + 1, lenlk):
+            # AB 和 AC 中因为A相等才能拿来生成 ABC, 确保了生成的是k项
+            l1 = list(lk[i])
+            l2 = list(lk[j])
+            l1.sort()
+            l2.sort()
+            if l1[: k - 2] == l2[: k - 2]:
+                retlist.append(lk[i] | lk[j])
+    return retlist
+
+
+def support_cal(d, ck, minsupport):
+    """计算备选项集的支持度，将满足minSupport要求的项集加入L，将项集支持度字典返回为supportData"""
+    sscnt = {}
+    for tid in d:
+        for can in ck:
+            if can.issubset(tid):
+                if can not in sscnt:
+                    sscnt[can] = d[tid]
+                else:
+                    sscnt[can] += d[tid]
+    numitems = float(sum(d.values()))
+    retlist = []
+    supportdata = {}
+    for key in sscnt:
+        support = sscnt[key] / numitems
+        if support >= minsupport:
+            retlist.insert(0, key)
+            supportdata[key] = support
+    return retlist, supportdata
+
+
+def conf_cal(freqset, supportdata, rulelist, minconf):
+    """计算置信度和提升度，生成规则的内部函数"""
+    for item in freqset:
+        conseq = frozenset([item])
+        conf = supportdata[freqset] / supportdata[freqset - conseq]
+        lift = supportdata[freqset] / (supportdata[conseq] * supportdata[freqset - conseq])
+        if conf >= minconf and lift > 1:
+            rulelist.append((freqset - conseq, conseq, round(supportdata[freqset], 4), conf, lift))
+    return rulelist
+
+
+def rules_gen(l, supportdata, minconf):
+    """生成规则"""
+    bigrulelist = []
+    step = int(40 / len(l))
+    for i in range(1, len(l)):
+        for freqset in l[i]:
+            conf_cal(freqset, supportdata, bigrulelist, minconf)
+        print('正在进行部件组合的关联分析:' + str(i) + '/' + str(len(l)) + '#' + str(50 + i * step))
+        sys.stdout.flush()
+    return bigrulelist
+
+
+def apriori_main(dataset, minsupport):
+    """用Apriori算法挖掘频繁集，maxconflen是最长集合的长度，他是挖掘可能的最大深度"""
+    step = max(int(40 / maxconflen), 1)
+    c1 = c1_create(dataset)
+    l1, supportdata = support_cal(dataset, c1, minsupport)
+    print('正在进行迭代分析:1/' + str(maxconflen) + '#' + str(10 + step))
+    sys.stdout.flush()
+    # 一个k项集整体是la的一个元素
+    la = [l1]
+    k = 2
+    # 迭代计算的新k频繁集会追加在L中
+    while len(la[k - 2]) > 0:
+        ck = apriori_gen(la[k - 2], k)
+        lk, supk = support_cal(dataset, ck, minsupport)
+        supportdata.update(supk)
+        la.append(lk)
+        print('正在进行迭代分析:' + str(k) + '/' + str(maxconflen) + '#' + str(10 + k * step))
+        sys.stdout.flush()
+        k += 1
+    # 最后一个k总会没有备选项了可以把它删掉
+    del la[-1]
+    return la, supportdata
+
+
+if __name__ == '__main__':
+    support = 0.3
+    confidence = 0.7
+    # 输入源为嵌套list，中间每一个list为一笔记录
+    dataSource = [['r', 'z', 'h', 'j', 'p'], ['z', 'y', 'x', 'w', 'v', 'u', 't', 's'], ['z'], ['r', 'x', 'n', 'o', 's'],
+                  ['y', 'r', 'x', 'z', 'q', 't', 'p'], ['y', 'z', 'x', 'e', 'q', 's', 't', 'm']]
+    # 预处理，转为每一种订单结构的dict(frozenset:cnt)，并取得最长订单的长度
+    dataSet = {}
+    maxconflen = 0
+    for order in dataSource:
+        if frozenset(order) in dataSet:
+            dataSet[frozenset(order)] += 1
+        else:
+            dataSet[frozenset(order)] = 1
+            if len(order) > maxconflen:
+                maxconflen = len(order)
+
+    # 挖掘频繁项集，需要最小支持度
+    L, supportData = apriori_main(dataSet, support)
+    # 生成规则，需要最小关联度，内置了提升度要求lift > 1
+    rules = pd.DataFrame(rules_gen(L, supportData, confidence))
+    rules.rename(index=str, columns={0: 'LHS', 1: 'RHS', 2: 'Support', 3: 'Confidence', 4: 'Lift'}, inplace=True)
+    print(rules)
+```

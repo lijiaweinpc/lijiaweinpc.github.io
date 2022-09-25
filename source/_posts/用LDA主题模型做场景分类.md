@@ -1,0 +1,191 @@
+---
+title: 用LDA主题模型做场景分类
+date: 2018-06-13
+tags: 数据挖掘
+---
+
+&emsp;&emsp;之前的项目中有使用到NLP中经典的文档生成主题模型LDA做场景分类，本文是其源码的核心部分记录，重要优化是使用了multiprocessing多核的手段来加速运算。
+<!--more-->
+
+```python
+# -*- coding: utf-8 -*-
+# 参考https://www.cnblogs.com/pinard/p/6908150.html     
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
+from multiprocessing import Pool
+import pandas as pd
+import numpy as np
+import jieba
+import time
+import os
+
+
+def run_lda(cntTf, n_topic, idx):
+    print("# Topic nums: %d, " % n_topic, "Start analysing")
+    t0 = time.time()
+    lda = LatentDirichletAllocation(n_components=n_topic,
+                                    max_iter=200,
+                                    learning_method='batch',
+                                    evaluate_every=200,
+                                    verbose=0)
+    lda.fit(cntTf)
+    perplexity = lda.perplexity(cntTf)
+    prob = lda.transform(cntTf)
+    comp = lda.components_ / lda.components_.sum(axis=1)[:, np.newaxis]
+    print("# Topic nums: %d, " % n_topic, "end time: %0.3fs," % (time.time() - t0), "perplexity: %0.3f" % perplexity)
+    return (perplexity, prob, comp)
+
+
+def run_kmeans(X, k, i):
+    print("# Category nums: %d, " % k, "Start analysing")
+    t0 = time.time()
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(X)
+    SSE = sum(np.min(cdist(X, kmeans.cluster_centers_, "euclidean"), axis=1)) / X.shape[0]
+    print("# Category nums: %d, " % k, "end time: %0.3fs," % (time.time() - t0), "SSE: %0.3f" % SSE)
+    return (SSE)
+
+
+def get_perplexityLst_flag(perplexityLst):
+    flag_id = 0
+    for i in range(len(perplexityLst) - 1):
+        if perplexityLst[i] < perplexityLst[i + 1]:
+            flag_id = i
+            break
+    return (flag_id)
+
+
+def get_kmeans_flag(meandistortions):
+    flag_id = 0
+    target = (meandistortions[0] + 3 * meandistortions[-1]) / 4
+    for i in range(len(meandistortions) - 1):
+        if (meandistortions[i] > target and meandistortions[i + 1] < target):
+            flag_id = i + 1
+            break
+    return (flag_id)
+
+
+def get_time_stamp():
+    # time_stamp can be used as an id of a analyse
+    ct = time.time()
+    local_time = time.localtime(ct)
+    data_head = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+    data_secs = (ct - int(ct)) * 1000
+    time_stamp = "%s.%03d" % (data_head, data_secs)
+    # stamp = ("".join(time_stamp.split()[0].split("-"))+"".join(time_stamp.split()[1].split(":"))).replace('.', '')
+    return (time_stamp)
+
+
+if __name__ == '__main__':
+    workfolder = "D:\\Research\\Datasets\\NLP"
+    Rpt_no = get_time_stamp()
+    pool_maxnum = 4
+    n_topics = list(range(2, 6))
+    # add words need or not to be cut
+    jieba.suggest_freq('银行', True)
+    jieba.suggest_freq('张继科', True)
+    # get stopwords
+    stpwrdlst = []
+    file_list = os.listdir(workfolder)
+    try:
+        with open(os.path.join(workfolder, 'stop_words.txt')) as stpwrd_dic:
+            stpwrd_content = stpwrd_dic.read()
+        stpwrdlst = stpwrd_content.splitlines()
+        file_list.remove('stop_words.txt')
+    except:
+        pass
+
+    # dealing with every txt file
+    all_docs = []
+    for file_name in file_list:
+        if os.path.splitext(file_name)[1] == '.txt':
+            doc = os.path.splitext(file_name)[0]
+            data_path = os.path.join(workfolder, file_name)
+            with open(data_path, 'rb') as f:
+                document = f.read()
+                document_cut = jieba.cut(document)
+                result = ' '.join(document_cut)
+            all_docs.append(result)
+    print('Words Perpare Done!')
+
+    cntVector = CountVectorizer(stop_words=stpwrdlst)
+    cntTf = cntVector.fit_transform(all_docs)
+
+    # use multiprocess to caculate different topic_num models and perplexity 
+    resLst = [1.0] * len(n_topics)
+    perplexityLst = [1.0] * len(n_topics)
+    # PROB is the doc_topic matrix
+    PROB = [1.0] * len(n_topics)
+    # COMP is the topic_word matrix
+    COMP = [1.0] * len(n_topics)
+
+    p = Pool(pool_maxnum)
+    print('multiprocess start, begin to caculate LDA')
+    for i in range(len(n_topics)):
+        res = p.apply_async(run_lda, args=(cntTf, n_topics[i], i,))
+        resLst[i] = res
+    p.close()
+    p.join()
+    print('LDA finish')
+
+    # get the results
+    for i in range(len(n_topics)):
+        res = resLst[i].get()
+        perplexityLst[i] = res[0]
+        PROB[i] = res[1]
+        COMP[i] = res[2]
+    # find the best topic numbers
+    flag_id = get_perplexityLst_flag(perplexityLst)
+    # print the prob of the best perplexity
+    # print(PROB[flag_id])
+
+    Tbl_RPT_Cfg_Perplexity = pd.DataFrame(columns=['Rpt_no', 'Topic_Nums', 'Perplexity', 'Flag'])
+    Tbl_RPT_Cfg_Perplexity.Topic_Nums = n_topics
+    Tbl_RPT_Cfg_Perplexity.Perplexity = perplexityLst
+    Tbl_RPT_Cfg_Perplexity.Rpt_no = Rpt_no
+    Tbl_RPT_Cfg_Perplexity.Flag = 0
+    Tbl_RPT_Cfg_Perplexity.loc[flag_id, 'Flag'] = 1
+    # print(Tbl_RPT_Cfg_Perplexity)
+
+    print('start using doc-topic prob matrix to apply clustering')
+    prob = PROB[flag_id]
+    X = np.array(prob)
+    K = n_topics.copy()
+    resLst = [1.0] * len(K)
+    meandistortions = [1.0] * len(K)
+    KMEANS = [1.0] * len(K)
+
+    p = Pool(pool_maxnum)
+    for i in range(len(K)):
+        res = p.apply_async(run_kmeans, args=(X, K[i], i,))
+        resLst[i] = res
+    p.close()
+    p.join()
+    print('KMEANS finish')
+
+    # get the results
+    for i in range(len(K)):
+        meandistortions[i] = resLst[i].get()
+
+    flag_id = get_kmeans_flag(meandistortions)
+    Tbl_RPT_Cfg_Kmeans = pd.DataFrame(columns=['Rpt_no', 'KMEANS', 'SSE', 'Flag'])
+    Tbl_RPT_Cfg_Kmeans.KMEANS = K
+    Tbl_RPT_Cfg_Kmeans.SSE = meandistortions
+    Tbl_RPT_Cfg_Kmeans.Rpt_no = Rpt_no
+    Tbl_RPT_Cfg_Kmeans.Flag = 0
+    Tbl_RPT_Cfg_Kmeans.loc[flag_id, 'Flag'] = 1
+    # print(Tbl_RPT_Cfg_Kmeans)
+
+    # the above gives the relationship of KMEANS.k and SSE, choose a k and apply clustering to get result
+    kmeans = KMeans(n_clusters=K[flag_id])
+    kmeans.fit(X)
+    output = kmeans.labels_
+    print(output)
+    print('finish')
+```
+
+附：
+使用的示例新闻稿：[文档样例.zip](/static/用LDA主题模型做场景分类/文档样例.zip "文档样例.zip")
+停用词表：[stop_words.txt](/static/用LDA主题模型做场景分类/stop_words.txt "stop_words.txt")

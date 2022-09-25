@@ -1,0 +1,252 @@
+---
+title: 用FP-growth挖掘关联规则
+date: 2019-01-28
+tags: 数据挖掘
+---
+
+&emsp;&emsp;FP-growth是关联规则挖掘大的经典算法，它的优势在长组合集挖掘里非常突出，而事实上在大量场景中，FP-growth相对于Apriori算法几乎总有一定的效率优势。
+<!--more-->
+
+&emsp;&emsp;FP-growth会先遍历数据集将其压缩在频繁item组成的树形结构中，再在这个FP树上从叶子节点递归的“建立树-&gt;挖掘频繁项-&gt;建立树-&gt;挖掘频繁项……”直至根节点。FP树的建立避免了Apriori直接在原数据集上递进的硬统计，随频繁集的深度增大，支持度调小其效率提升十分显著。FP树的建立，首先需要对数据集的item按频次降续排序，剔除不满足频次阈值的item；之后遍历数据集，依次将item插入，同时在每个结点处记录该结点出现的频次，同时建立item总频次到每个该item节点的指针。FP树的挖掘，需要递归的获取此时节点所有前缀路径的集合（条件模式基）建立条件FP树，直至条件FP树为空（前缀就是频繁集）或者只有一条路径（枚举这条路径都是频繁集）。
+&emsp;&emsp;找到频繁集之后，挖掘关联规则的方式与Apriori源码思想保持一致，这里使用了并行的方式来挖掘以提高效率，对应的会出现一个小的问题就是进度的打印可能会有回退，我没有专门再建立一个进程来管理打印，这种情况让前台来管控回退时不处理是更经济的。
+&emsp;&emsp;FP-growth的优势在长组合集挖掘里非常明显，在一个实测案例中，当深度=13，挖掘结果数10万左右时，FP=1s，AP=5s；而当深度=16时，挖掘结果数近60万，FP=13s，AP=7m；从深度&gt;18开始，结果&gt;280万，FP&gt;1m，而AP在我的服务器上已经完全跑不出结果了(
+等待超过1d)。极限的深度=23，FP用51m挖掘出了10亿条规则！
+
+```python
+# -*- coding: utf-8 -*-
+from multiprocessing import Pool
+from numpy import linspace
+from math import ceil
+import pandas as pd
+import sys
+
+POOL_NUM = 4
+
+
+class TreeNode:
+    """FP树节点类"""
+
+    def __init__(self, name, count, parent):
+        self.name = name  # 值
+        self.count = count  # 计数
+        self.parent = parent  # 父亲节点
+        self.children = {}  # 儿子节点
+        self.link = None  # 节点横向链
+
+    def increase(self, count):
+        self.count += count
+
+    def display(self, index=1):
+        print(' ' * index, self.name, ' ', self.count)
+        for child in self.children.values():
+            child.display(index + 1)
+
+
+def update_header(node, target):
+    """更新频繁集链表指针"""
+    while node.link is not None:
+        node = node.link
+    node.link = target
+
+
+def update_fptree(items, intree, headertable, count):
+    """添加新的配置(items,count)到FP树(intree)"""
+    if items[0] in intree.children:
+        # 结点已经是子结点
+        intree.children[items[0]].increase(count)
+    else:
+        intree.children[items[0]] = TreeNode(items[0], count, intree)
+        # 更新相应频繁项集的链表
+        if headertable[items[0]][1] is None:
+            headertable[items[0]][1] = intree.children[items[0]]
+        else:
+            update_header(headertable[items[0]][1], intree.children[items[0]])
+    # 递归遍历整个配置
+    if len(items) > 1:
+        update_fptree(items[1::], intree.children[items[0]], headertable, count)
+
+
+def create_fptree(dataset, minnum):
+    """创建FP树，使用最少出现的频次"""
+    headertable = {}
+    # 统计每个元素的频次
+    for rec in dataset:
+        for item in rec:
+            headertable[item] = headertable.get(item, 0) + dataset[rec]
+    # 删除不满足minnum的元素
+    for k in list(headertable.keys()):
+        if headertable[k] < minnum:
+            del (headertable[k])
+    freq_itemset = set(headertable.keys())
+
+    if len(freq_itemset) == 0:
+        return None, None
+
+    for k in headertable:
+        headertable[k] = [headertable[k], None]
+    rettree = TreeNode('Null Set', 1, None)
+    for transet, count in dataset.items():
+        localdict = {}
+        for item in transet:
+            # 过滤，只取该样本中满足最小支持度的频繁项
+            if item in freq_itemset:
+                localdict[item] = headertable[item][0]
+        if len(localdict) > 0:
+            # 根据全局频数从大到小对样本排序
+            item_ordered = [v[0] for v in sorted(localdict.items(), key=lambda q: (q[1], q[0]), reverse=True)]
+            # 用过滤且排序后的样本更新树
+            update_fptree(item_ordered, rettree, headertable, count)
+    return rettree, headertable
+
+
+def ascend_fptree(leafnode, prefixpath):
+    """递归回溯FP数，补全一条前缀路径，挖掘条件模式基的内部函数"""
+    if leafnode.parent is not None:
+        prefixpath.append(leafnode.name)
+        ascend_fptree(leafnode.parent, prefixpath)
+
+
+def find_prefixpath(basepart, myheadertab):
+    """挖掘条件模式基"""
+    node = myheadertab[basepart][1]
+    condparts = {}
+    while node is not None:
+        prefixpath = []
+        ascend_fptree(node, prefixpath)
+        if len(prefixpath) > 1:
+            condparts[frozenset(prefixpath[1:])] = node.count
+        # 继续下一个basepart结点
+        node = node.link
+    return condparts
+
+
+def mine_fptree(headertable, minnums, prefix, freq_itemlist, needprint):
+    """递归挖掘频繁项集，preFix，freq_itemlist存储已挖掘到的频繁集，留空就好"""
+    biglist = [(v[0], v[1][0]) for v in sorted(headertable.items(), key=lambda q: (q[1][0], q[0]))]
+    biglistnum = len(biglist)
+    printdict = {}
+    if needprint:
+        # 进度打印
+        checkpoints = linspace(11, 49, biglistnum, dtype=int)
+        printdict[0] = checkpoints[0]
+        for i in range(1, biglistnum):
+            if checkpoints[i] != checkpoints[i - 1]:
+                printdict[i] = checkpoints[i]
+    for i in range(biglistnum):
+        if i in printdict.keys():
+            print('正在由条件模式基挖掘频繁项#' + str(printdict[i]))
+        basepart = biglist[i]
+        newfreqset = prefix.copy()
+        newfreqset.add(basepart)
+        freq_itemlist.append(newfreqset)
+        condpartbases = find_prefixpath(basepart[0], headertable)
+        # 构造当前频繁项的条件FP树
+        mycondtree, myhead = create_fptree(condpartbases, minnums)
+        if myhead is not None:
+            # 递归挖掘条件FP树
+            mine_fptree(myhead, minnums, newfreqset, freq_itemlist, False)
+
+
+def conf_cal(freqset, supportdata, partsnum, rulelist, minconf):
+    """计算置信度和提升度，生成规则的内部函数"""
+    sd = supportdata[0]
+    supportdata0 = supportdata[partsnum - 2]
+    supportdata1 = supportdata[partsnum - 1]
+    for item in freqset:
+        conseq = frozenset([item])
+        conf = supportdata1[freqset] / supportdata0[freqset - conseq]
+        lift = supportdata1[freqset] / (sd[conseq] * supportdata0[freqset - conseq])
+        if conf >= minconf and lift > 1:
+            rulelist.append((freqset - conseq, conseq, round(supportdata1[freqset], 4), conf, lift))
+    return rulelist
+
+
+def rules_gen(l, supportdata, minconf, partsnum):
+    """生成规则"""
+    ln = l[partsnum - 1]
+    maxnum = len(l)
+    bigrulelist = []
+    for freqset in ln:
+        conf_cal(freqset, supportdata, partsnum, bigrulelist, minconf)
+    print('完成' + str(partsnum) + '部件组合的关联分析#' + str(50 + int(partsnum / maxnum * 40)))
+    sys.stdout.flush()
+    return bigrulelist
+
+
+def encode_dataset(datasource):
+    """编码保证在建立和挖掘fp树的过程中item排序的一致性"""
+    dataset = {}
+    encodedict = {}
+    decodelist = []
+    maxconflen = 0
+    i = 0
+    for order in datasource:
+        maxconflen = max(maxconflen, len(order))
+        for j in range(len(order)):
+            try:
+                order[j] = encodedict[order[j]]
+            except KeyError:
+                encodedict[order[j]] = i
+                decodelist.append(order[j])
+                order[j] = i
+                i += 1
+        if frozenset(order) in dataset:
+            dataset[frozenset(order)] += 1
+        else:
+            dataset[frozenset(order)] = 1
+    return dataset, maxconflen, decodelist
+
+
+def convert_freqitems(decodelist, freqitems, totalnums, maxconflen):
+    """解码频繁项集"""
+    la = []
+    supportdata = {}
+    for i in range(maxconflen):
+        la.append([])
+        supportdata[i] = {}
+    for item in freqitems:
+        conf = frozenset([decodelist[q[0]] for q in item])
+        la[len(conf) - 1].append(conf)
+        supportdata[len(conf) - 1][conf] = min([q[1] for q in item]) / totalnums
+    ll = [l1 for l1 in la if l1 != []]
+    for key in list(supportdata.keys()):
+        if supportdata[key] == {}:
+            del (supportdata[key])
+    return ll, supportdata
+
+
+if __name__ == '__main__':
+    support = 0.3
+    confidence = 0.7
+    # 输入源为嵌套list，中间每一个list为一笔记录
+    dataSource = [['r', 'z', 'h', 'j', 'p'], ['z', 'y', 'x', 'w', 'v', 'u', 't', 's'], ['z'], ['r', 'x', 'n', 'o', 's'],
+                  ['y', 'r', 'x', 'z', 'q', 't', 'p'], ['y', 'z', 'x', 'e', 'q', 's', 't', 'm']]
+
+    # 编码，转为每一种订单结构的dict(frozenset:cnt)，并取得最长的订单的长度
+    dataSet, maxConfLen, decodeList = encode_dataset(dataSource)
+
+    # 构建FP树，需要最小支持度对应的频数
+    supportNum = ceil(support * sum(dataSet.values()))
+    myFPtree, myHeaderTab = create_fptree(dataSet, supportNum)
+
+    # 挖掘频繁项集
+    freqItems = []
+    mine_fptree(myHeaderTab, supportNum, set([]), freqItems, True)
+    L, supportData = convert_freqitems(decodeList, freqItems, sum(dataSet.values()), maxConfLen)
+    # 并行挖掘关联规则，需要最小关联度，内置了提升度要求lift > 1
+    resLst = [[]] * (len(L) - 1)
+    p = Pool(POOL_NUM)
+    for n in range(1, len(L)):
+        res = p.apply_async(rules_gen, args=(L, supportData, confidence, n + 1,))
+        resLst[n - 1] = res
+    p.close()
+    p.join()
+    # 收集挖掘结果
+    rule = []
+    for n in range(len(resLst)):
+        rule += resLst[n].get()
+
+    rules = pd.DataFrame(rule)
+    rules.rename(index=str, columns={0: 'LHS', 1: 'RHS', 2: 'Support', 3: 'Confidence', 4: 'Lift'}, inplace=True)
+    print(rules)
+```
