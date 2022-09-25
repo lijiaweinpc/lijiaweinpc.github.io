@@ -273,7 +273,7 @@ reward_settings:
 
 reward:
   wechatpay: /static/wechatpay.png
-  alipay: /images/alipay.png
+  alipay: /static/alipay.png
   #paypal: /images/paypal.png
   #bitcoin: /images/bitcoin.png
 
