@@ -1,7 +1,7 @@
 ---
 title: 用LDA主题模型做场景分类
-date: 2018-06-13
-tags: 数据挖掘
+date: 2019-06-13
+tags: NLP
 ---
 
 &emsp;&emsp;之前的项目中有使用到NLP中经典的文档生成主题模型LDA做场景分类，本文是其源码的核心部分记录，重要优化是使用了multiprocessing多核的手段来加速运算。

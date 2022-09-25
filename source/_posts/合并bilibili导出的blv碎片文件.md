@@ -1,7 +1,7 @@
 ---
 title: 合并bilibili导出的blv碎片文件
 date: 2019-07-07
-tags:
+tags: 技术杂文
 ---
 
 &emsp;&emsp;当使用手机缓存B站的视频时会发现，一个视频被拆成了很多blv格式的碎片，将大量的碎片合并成一个mp4文件，这里记录的方法作者原文在[https://www.cnblogs.com/FHC1994/p/10760809.html](https://www.cnblogs.com/FHC1994/p/10760809.html)

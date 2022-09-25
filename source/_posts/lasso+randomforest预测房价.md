@@ -1,7 +1,7 @@
 ---
 title: lasso+randomforest预测房价
 date: 2018-11-14
-tags: kaggle
+tags: [kaggle,数据挖掘]
 ---
 
 &emsp;&emsp;Kaggle的练习比赛——House Prices Advanced Regression

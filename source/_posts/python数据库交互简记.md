@@ -1,7 +1,7 @@
 ---
 title: python数据库交互简记
 date: 2019-07-06
-tags: 杂文
+tags: 数据库
 ---
 
 &emsp;&emsp;这里记录sqlite，mysql，SqlServer，以及oracle这几种数据库的导入导出和部分交互。
