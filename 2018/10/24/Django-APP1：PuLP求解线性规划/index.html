@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"lijiaweinpc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文讲述Django-APP1案例的搭建，这个故事背景是随机生成肯德基点单，需要输入总预算，可以选择主食，也可以不选，可以选择是否打包带走，选的话多一个固定的包装费。背后是一个简单的线性规划问题，使用PuLP进行的求解。   框架架构改编自一个真实的项目，各部分功能都做了简化只保留原理，随便找到了一些KFC的价格就拿来用了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Django-APP1：PuLP求解线性规划">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/10/24/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="本文讲述Django-APP1案例的搭建，这个故事背景是随机生成肯德基点单，需要输入总预算，可以选择主食，也可以不选，可以选择是否打包带走，选的话多一个固定的包装费。背后是一个简单的线性规划问题，使用PuLP进行的求解。   框架架构改编自一个真实的项目，各部分功能都做了简化只保留原理，随便找到了一些KFC的价格就拿来用了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lijiaweinpc.github.io/static/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/CodeCogsEqn.gif">
+<meta property="article:published_time" content="2018-10-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-25T10:46:52.763Z">
+<meta property="article:author" content="Jiawei">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="django">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lijiaweinpc.github.io/static/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/CodeCogsEqn.gif">
+
+
+<link rel="canonical" href="https://lijiaweinpc.github.io/2018/10/24/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://lijiaweinpc.github.io/2018/10/24/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/","path":"2018/10/24/Django-APP1：PuLP求解线性规划/","title":"Django-APP1：PuLP求解线性规划"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Django-APP1：PuLP求解线性规划 | VOID</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">VOID</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jiawei"
+      src="/static/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jiawei</p>
+  <div class="site-description" itemprop="description">Jiawei的小屋</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lijiaweinpc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lijiaweinpc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:npc_li@163.com" title="E-Mail → mailto:npc_li@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2018/10/24/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/static/avatar.jpg">
+      <meta itemprop="name" content="Jiawei">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+      <meta itemprop="description" content="Jiawei的小屋">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Django-APP1：PuLP求解线性规划 | VOID">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Django-APP1：PuLP求解线性规划
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-10-24 00:00:00" itemprop="dateCreated datePublished" datetime="2018-10-24T00:00:00+08:00">2018-10-24</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>  本文讲述Django-APP1案例的搭建，这个故事背景是随机生成肯德基点单，需要输入总预算，可以选择主食，也可以不选，可以选择是否打包带走，选的话多一个固定的包装费。背后是一个简单的线性规划问题，使用PuLP进行的求解。<br />
+  框架架构改编自一个真实的项目，各部分功能都做了简化只保留原理，随便找到了一些KFC的价格就拿来用了。</p>
+<span id="more"></span>
+<p>  今天中午准备吃KFC，点点啥呢好纠结啊，这样吧不超过50块随机生成些方案我们来挑吧。这是一个简单的线性规划问题，用模型描述如下：<br />
+<img src="/static/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/CodeCogsEqn.gif" alt="" title="问题描述" /><br />
+我们以每一种备选的菜品的购买数量为一个变量，目标是在不超过预算的情况下尽可能的总价值接近它，为了增加复杂度，也为了使营养均衡我加个一些条件：</p>
+<ul>
+<li>每一种菜品最多买两个；</li>
+<li>主食是直接指定名称或根据选择的价格来筛选选定，当然也可以不选；</li>
+<li>每次计算只取50%的备选项参与，所以能产生随机的效果；</li>
+<li>可以勾选打包，打包多1.5包装费。<br />
+首先我们需要准备好一张菜单价格基表，这里我是在网上随便找到整理的一些价格数据，直接导入到自带的sqlite数据库中：<a href="/static/Django-APP1%EF%BC%9APuLP%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E8%A7%84%E5%88%92/ITEM_CATEGORY.xlsx" title="ITEM_CATEGORY.xlsx">ITEM_CATEGORY.xlsx</a></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这一部分详细记录在项目的hisrand_gen.py中</span></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"></span><br><span class="line">engine = create_engine(<span class="string">r&#x27;sqlite:///db.sqlite3&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line">df = pd.read_excel(<span class="string">r&#x27;APP1_LP/appfiles/ITEM_CATEGORY.xlsx&#x27;</span>)</span><br><span class="line">df.to_sql(<span class="string">&#x27;APP1_LP_ITEM_CATEGORY&#x27;</span>, engine, if_exists=<span class="string">&#x27;replace&#x27;</span>, index=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+<p>主要的业务处理是views.py中的推荐函数:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">RandRecommand</span>(<span class="params">TTPay</span>):</span><br><span class="line">    <span class="comment"># Main recommand function</span></span><br><span class="line">    RAND_RECOMMAND = pd.DataFrame(columns=[<span class="string">&#x27;ITEM_CATEGORY&#x27;</span>, <span class="string">&#x27;ITEM&#x27;</span>, <span class="string">&#x27;ITEM_DESCRIPTION&#x27;</span>, <span class="string">&#x27;Qty&#x27;</span>, <span class="string">&#x27;PRICE&#x27;</span>])</span><br><span class="line">    RAND_RECOMMAND_INDEX = <span class="number">0</span></span><br><span class="line">    <span class="comment"># Using rand 50% of the choices everytime</span></span><br><span class="line">    ITEM_CATEGORY_T = ITEM_CATEGORY[ITEM_CATEGORY[<span class="string">&#x27;ITEM_CATEGORY&#x27;</span>] != <span class="string">&#x27;Staple&#x27;</span>].sample(frac=<span class="number">0.5</span>)</span><br><span class="line">    model = pulp.LpProblem(<span class="string">&quot;Rand Food&quot;</span>, pulp.LpMinimize)</span><br><span class="line">    var = &#123;&#125;</span><br><span class="line">    TTPRICE = <span class="string">&#x27;&#x27;</span></span><br><span class="line">    TTNums = <span class="string">&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">for</span> index <span class="keyword">in</span> ITEM_CATEGORY_T.index:</span><br><span class="line">        var[index] = pulp.LpVariable(<span class="built_in">str</span>(index), lowBound=<span class="number">0</span>, cat=<span class="string">&#x27;Integer&#x27;</span>)</span><br><span class="line">        TTPRICE += ITEM_CATEGORY_T.loc[index, <span class="string">&#x27;PRICE&#x27;</span>] * var[index]</span><br><span class="line">        TTNums += var[index]</span><br><span class="line">        model += var[index] &lt;= <span class="number">2</span></span><br><span class="line">    model += TTPay - TTPRICE</span><br><span class="line">    model += TTPRICE &lt;= TTPay</span><br><span class="line">    model.solve()</span><br><span class="line">    status = pulp.LpStatus[model.status]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> var:</span><br><span class="line">        <span class="keyword">if</span> status != <span class="string">&#x27;Optimal&#x27;</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">elif</span> var[key].varValue &gt; <span class="number">0</span>:</span><br><span class="line">            RAND_RECOMMAND.loc[RAND_RECOMMAND_INDEX] = [ITEM_CATEGORY.loc[key, <span class="string">&#x27;ITEM_CATEGORY&#x27;</span>],</span><br><span class="line">                                                        ITEM_CATEGORY.loc[key, <span class="string">&#x27;ITEM&#x27;</span>],</span><br><span class="line">                                                        ITEM_CATEGORY.loc[key, <span class="string">&#x27;ITEM_DESCRIPTION&#x27;</span>], var[key].varValue,</span><br><span class="line">                                                        ITEM_CATEGORY.loc[key, <span class="string">&#x27;PRICE&#x27;</span>]]</span><br><span class="line">            RAND_RECOMMAND_INDEX += <span class="number">1</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">    RAND_RECOMMAND = RAND_RECOMMAND.sort_values(by=[<span class="string">&#x27;ITEM_CATEGORY&#x27;</span>, <span class="string">&#x27;ITEM&#x27;</span>])</span><br><span class="line">    <span class="keyword">return</span> RAND_RECOMMAND</span><br></pre></td></tr></table></figure>
+<p>可以看到，虽然scipy也可以求解线性规划问题，但是使用Pulp的话整个过程直接写式子就好，理解起来会更简单，也更容易修改方便模型变化。<br />
+此外我们一共需要提供五个接口给前台，分别是查询所有的主食、价格、选定主食时查价格、选定价格时查主食，还有最后推荐计算。先展示路由：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> django.urls <span class="keyword">import</span> path, re_path</span><br><span class="line"><span class="keyword">from</span> . <span class="keyword">import</span> views</span><br><span class="line"></span><br><span class="line">app_name = <span class="string">&#x27;APP1&#x27;</span></span><br><span class="line">urlpatterns = [</span><br><span class="line">    re_path(<span class="string">r&#x27;PriceSelected(\d+)/&#x27;</span>, views.PriceSelected),</span><br><span class="line">    re_path(<span class="string">r&#x27;StapleSelected(\d+)/&#x27;</span>, views.StapleSelected),</span><br><span class="line">    path(<span class="string">r&#x27;Recommend/&#x27;</span>, views.Recommend),</span><br><span class="line">    path(<span class="string">r&#x27;Price&#x27;</span>, views.Price),</span><br><span class="line">    path(<span class="string">r&#x27;Staple/&#x27;</span>, views.Staple),</span><br><span class="line">    path(<span class="string">&#x27;&#x27;</span>, views.Index, name=<span class="string">&#x27;index&#x27;</span>),</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>推荐的部分重点内容前面已经讲到了，这里主要说其他四个接口，对应的业务处理views.py部分的方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">Staple</span>(<span class="params">request</span>):</span><br><span class="line">    <span class="comment"># Give all staple directly for choose</span></span><br><span class="line">    Staple = ITEM_CATEGORY[ITEM_CATEGORY[<span class="string">&#x27;ITEM_CATEGORY&#x27;</span>] == <span class="string">&#x27;Staple&#x27;</span>]</span><br><span class="line">    <span class="built_in">list</span> = []</span><br><span class="line">    <span class="keyword">for</span> index <span class="keyword">in</span> Staple.index:</span><br><span class="line">        <span class="built_in">list</span>.append(&#123;<span class="string">&#x27;id&#x27;</span>: <span class="built_in">str</span>(index), <span class="string">&#x27;name&#x27;</span>: <span class="built_in">str</span>(Staple.loc[index, <span class="string">&#x27;ITEM_DESCRIPTION&#x27;</span>])&#125;)</span><br><span class="line">    <span class="keyword">return</span> JsonResponse(&#123;<span class="string">&#x27;data&#x27;</span>: <span class="built_in">list</span>&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">Price</span>(<span class="params">request</span>):</span><br><span class="line">    <span class="comment"># Give all price.dropduplicates directly for choose</span></span><br><span class="line">    Price = pd.DataFrame(</span><br><span class="line">        ITEM_CATEGORY[ITEM_CATEGORY[<span class="string">&#x27;ITEM_CATEGORY&#x27;</span>] == <span class="string">&#x27;Staple&#x27;</span>][<span class="string">&#x27;PRICE&#x27;</span>].drop_duplicates().sort_values())</span><br><span class="line">    <span class="built_in">list</span> = []</span><br><span class="line">    <span class="keyword">for</span> index <span class="keyword">in</span> Price.index:</span><br><span class="line">        <span class="built_in">list</span>.append(&#123;<span class="string">&#x27;id&#x27;</span>: <span class="built_in">str</span>(index), <span class="string">&#x27;name&#x27;</span>: <span class="built_in">str</span>(Price.loc[index, <span class="string">&#x27;PRICE&#x27;</span>])&#125;)</span><br><span class="line">    <span class="keyword">return</span> JsonResponse(&#123;<span class="string">&#x27;data&#x27;</span>: <span class="built_in">list</span>&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">StapleSelected</span>(<span class="params">request, <span class="built_in">id</span></span>):</span><br><span class="line">    <span class="comment"># When cilcking on a staple, get the price</span></span><br><span class="line">    Price = ITEM_CATEGORY.loc[<span class="built_in">int</span>(<span class="built_in">id</span>), <span class="string">&#x27;PRICE&#x27;</span>]</span><br><span class="line">    <span class="built_in">list</span> = []</span><br><span class="line">    <span class="built_in">list</span>.append(&#123;<span class="string">&#x27;id&#x27;</span>: <span class="built_in">str</span>(Price), <span class="string">&#x27;name&#x27;</span>: <span class="built_in">str</span>(Price)&#125;)</span><br><span class="line">    <span class="keyword">return</span> JsonResponse(&#123;<span class="string">&#x27;data&#x27;</span>: <span class="built_in">list</span>&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">PriceSelected</span>(<span class="params">request, <span class="built_in">id</span></span>):</span><br><span class="line">    <span class="comment"># When cilcking on a price, get the stape</span></span><br><span class="line">    Price = ITEM_CATEGORY.loc[<span class="built_in">int</span>(<span class="built_in">id</span>), <span class="string">&#x27;PRICE&#x27;</span>]</span><br><span class="line">    Staple = ITEM_CATEGORY[(ITEM_CATEGORY[<span class="string">&#x27;ITEM_CATEGORY&#x27;</span>] == <span class="string">&#x27;Staple&#x27;</span>) &amp; (ITEM_CATEGORY[<span class="string">&#x27;PRICE&#x27;</span>] == Price)]</span><br><span class="line">    <span class="built_in">list</span> = []</span><br><span class="line">    <span class="keyword">for</span> index <span class="keyword">in</span> Staple.index:</span><br><span class="line">        <span class="built_in">list</span>.append(&#123;<span class="string">&#x27;id&#x27;</span>: <span class="built_in">str</span>(index), <span class="string">&#x27;name&#x27;</span>: <span class="built_in">str</span>(Staple.loc[index, <span class="string">&#x27;ITEM_DESCRIPTION&#x27;</span>])&#125;)</span><br><span class="line">    <span class="keyword">return</span> JsonResponse(&#123;<span class="string">&#x27;data&#x27;</span>: <span class="built_in">list</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>对应的前台处理html中js部分的方法：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"> // Get all staples</span><br><span class="line">$.get(&#x27;/APP1/Staple&#x27;,function (dic) &#123;</span><br><span class="line">$.each(dic.data,function (index, item) &#123;</span><br><span class="line">$(&#x27;#Staple&#x27;).append(&#x27;</span><br><span class="line"><span class="tag">&lt;<span class="name">option</span> <span class="attr">value</span>=<span class="string">&quot;&#x27;+item.id+&#x27;&quot;</span>&gt;</span>&#x27;+item.name+&#x27;<span class="tag">&lt;/<span class="name">option</span>&gt;</span>&#x27;)</span><br><span class="line">&#125;)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">// Get all stapleprices</span><br><span class="line">$.get(&#x27;/APP1/Price&#x27;,function (dic) &#123;</span><br><span class="line">$.each(dic.data,function (index, item) &#123;</span><br><span class="line">$(&#x27;#StaplePrice&#x27;).append(&#x27;</span><br><span class="line"><span class="tag">&lt;<span class="name">option</span> <span class="attr">value</span>=<span class="string">&quot;&#x27;+item.id+&#x27;&quot;</span>&gt;</span>&#x27;+item.name+&#x27;<span class="tag">&lt;/<span class="name">option</span>&gt;</span>&#x27;)</span><br><span class="line">&#125;)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">// When staple selected, change the price</span><br><span class="line">$(&#x27;#Staple&#x27;).change(function () &#123;</span><br><span class="line">if(parseInt($(this).val()) &gt;= 0)&#123;</span><br><span class="line">$.get(&#x27;/APP1/StapleSelected&#x27;+$(this).val()+&#x27;/&#x27;,function (dic) &#123;</span><br><span class="line">$.each(dic.data,function (index, item) &#123;</span><br><span class="line">$(&#x27;#StaplePrice&#x27;).empty().append(&#x27;</span><br><span class="line"><span class="tag">&lt;<span class="name">option</span> <span class="attr">value</span>=<span class="string">&quot;&#x27;+item.id+&#x27;&quot;</span>&gt;</span>&#x27;+item.name+&#x27;<span class="tag">&lt;/<span class="name">option</span>&gt;</span>&#x27;)</span><br><span class="line">&#125;)</span><br><span class="line">$(&#x27;#StaplePrice&#x27;).setAttribute(&#x27;disabled&#x27;,&#x27;true&#x27;);</span><br><span class="line">&#125;)</span><br><span class="line">&#125;else&#123;</span><br><span class="line">ajaxInfo();</span><br><span class="line">&#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">// When price selected, change the staple</span><br><span class="line">$(&#x27;#StaplePrice&#x27;).change(function () &#123;</span><br><span class="line">$(&#x27;#Staple&#x27;).empty().append(&#x27;</span><br><span class="line"><span class="tag">&lt;<span class="name">option</span>&gt;</span> choose staple<span class="tag">&lt;/<span class="name">option</span>&gt;</span>&#x27;)</span><br><span class="line">if(parseInt($(this).val()) &gt;= 0)&#123;</span><br><span class="line">$.get(&#x27;/APP1/PriceSelected&#x27;+$(this).val()+&#x27;/&#x27;,function (dic) &#123;</span><br><span class="line">$.each(dic.data,function (index, item) &#123;</span><br><span class="line">$(&#x27;#Staple&#x27;).append(&#x27;</span><br><span class="line"><span class="tag">&lt;<span class="name">option</span> <span class="attr">value</span>=<span class="string">&quot;&#x27;+item.id+&#x27;&quot;</span>&gt;</span>&#x27;+item.name+&#x27;<span class="tag">&lt;/<span class="name">option</span>&gt;</span>&#x27;)</span><br><span class="line">&#125;)</span><br><span class="line">&#125;)</span><br><span class="line">&#125;else&#123;</span><br><span class="line">ajaxInfo();</span><br><span class="line">&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>  OK，进入页面，输入总的支付意愿，开始生成推荐吧，不喜欢？再点一次~<br />
+  完整的内容还是直接到项目里去看吧应该会更容易理解:<a target="_blank" rel="noopener" href="https://github.com/lijiaweinpc/project_site">project_site:使用Django搭建的网站半成品，方便快速建站</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee? Thx bro!</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/static/wechatpay.png" alt="Jiawei 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/static/alipay.png" alt="Jiawei 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+              <a href="/tags/django/" rel="tag"># django</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/06/13/%E5%A4%96%E6%B1%87%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E5%BB%BA%E5%BA%93/" rel="prev" title="外汇历史数据建库">
+                  <i class="fa fa-chevron-left"></i> 外汇历史数据建库
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/11/14/lasso+randomforest%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7/" rel="next" title="lasso+randomforest预测房价">
+                  lasso+randomforest预测房价 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiawei</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdnjs.cloudflare.com/ajax/libs/ribbon.js/1.0.2/ribbon.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

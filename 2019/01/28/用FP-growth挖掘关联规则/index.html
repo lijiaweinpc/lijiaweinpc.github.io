@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"lijiaweinpc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="FP-growth是关联规则挖掘大的经典算法，它的优势在长组合集挖掘里非常突出，而事实上在大量场景中，FP-growth相对于Apriori算法几乎总有一定的效率优势。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用FP-growth挖掘关联规则">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2019/01/28/%E7%94%A8FP-growth%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="FP-growth是关联规则挖掘大的经典算法，它的优势在长组合集挖掘里非常突出，而事实上在大量场景中，FP-growth相对于Apriori算法几乎总有一定的效率优势。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-01-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-25T10:46:52.778Z">
+<meta property="article:author" content="Jiawei">
+<meta property="article:tag" content="数据挖掘">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://lijiaweinpc.github.io/2019/01/28/%E7%94%A8FP-growth%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://lijiaweinpc.github.io/2019/01/28/%E7%94%A8FP-growth%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/","path":"2019/01/28/用FP-growth挖掘关联规则/","title":"用FP-growth挖掘关联规则"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用FP-growth挖掘关联规则 | VOID</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">VOID</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jiawei"
+      src="/static/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jiawei</p>
+  <div class="site-description" itemprop="description">Jiawei的小屋</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lijiaweinpc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lijiaweinpc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:npc_li@163.com" title="E-Mail → mailto:npc_li@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2019/01/28/%E7%94%A8FP-growth%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/static/avatar.jpg">
+      <meta itemprop="name" content="Jiawei">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+      <meta itemprop="description" content="Jiawei的小屋">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用FP-growth挖掘关联规则 | VOID">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用FP-growth挖掘关联规则
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-28 00:00:00" itemprop="dateCreated datePublished" datetime="2019-01-28T00:00:00+08:00">2019-01-28</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>  FP-growth是关联规则挖掘大的经典算法，它的优势在长组合集挖掘里非常突出，而事实上在大量场景中，FP-growth相对于Apriori算法几乎总有一定的效率优势。</p>
+<span id="more"></span>
+<p>  FP-growth会先遍历数据集将其压缩在频繁item组成的树形结构中，再在这个FP树上从叶子节点递归的“建立树-&gt;挖掘频繁项-&gt;建立树-&gt;挖掘频繁项……”直至根节点。FP树的建立避免了Apriori直接在原数据集上递进的硬统计，随频繁集的深度增大，支持度调小其效率提升十分显著。FP树的建立，首先需要对数据集的item按频次降续排序，剔除不满足频次阈值的item；之后遍历数据集，依次将item插入，同时在每个结点处记录该结点出现的频次，同时建立item总频次到每个该item节点的指针。FP树的挖掘，需要递归的获取此时节点所有前缀路径的集合（条件模式基）建立条件FP树，直至条件FP树为空（前缀就是频繁集）或者只有一条路径（枚举这条路径都是频繁集）。<br />
+  找到频繁集之后，挖掘关联规则的方式与Apriori源码思想保持一致，这里使用了并行的方式来挖掘以提高效率，对应的会出现一个小的问题就是进度的打印可能会有回退，我没有专门再建立一个进程来管理打印，这种情况让前台来管控回退时不处理是更经济的。<br />
+  FP-growth的优势在长组合集挖掘里非常明显，在一个实测案例中，当深度=13，挖掘结果数10万左右时，FP=1s，AP=5s；而当深度=16时，挖掘结果数近60万，FP=13s，AP=7m；从深度&gt;18开始，结果&gt;280万，FP&gt;1m，而AP在我的服务器上已经完全跑不出结果了(<br />
+等待超过1d)。极限的深度=23，FP用51m挖掘出了10亿条规则！</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Pool</span><br><span class="line"><span class="keyword">from</span> numpy <span class="keyword">import</span> linspace</span><br><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> ceil</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">POOL_NUM = <span class="number">4</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TreeNode</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;FP树节点类&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, name, count, parent</span>):</span><br><span class="line">        self.name = name  <span class="comment"># 值</span></span><br><span class="line">        self.count = count  <span class="comment"># 计数</span></span><br><span class="line">        self.parent = parent  <span class="comment"># 父亲节点</span></span><br><span class="line">        self.children = &#123;&#125;  <span class="comment"># 儿子节点</span></span><br><span class="line">        self.link = <span class="literal">None</span>  <span class="comment"># 节点横向链</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">increase</span>(<span class="params">self, count</span>):</span><br><span class="line">        self.count += count</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">display</span>(<span class="params">self, index=<span class="number">1</span></span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27; &#x27;</span> * index, self.name, <span class="string">&#x27; &#x27;</span>, self.count)</span><br><span class="line">        <span class="keyword">for</span> child <span class="keyword">in</span> self.children.values():</span><br><span class="line">            child.display(index + <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_header</span>(<span class="params">node, target</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;更新频繁集链表指针&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">while</span> node.link <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        node = node.link</span><br><span class="line">    node.link = target</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_fptree</span>(<span class="params">items, intree, headertable, count</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;添加新的配置(items,count)到FP树(intree)&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> items[<span class="number">0</span>] <span class="keyword">in</span> intree.children:</span><br><span class="line">        <span class="comment"># 结点已经是子结点</span></span><br><span class="line">        intree.children[items[<span class="number">0</span>]].increase(count)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        intree.children[items[<span class="number">0</span>]] = TreeNode(items[<span class="number">0</span>], count, intree)</span><br><span class="line">        <span class="comment"># 更新相应频繁项集的链表</span></span><br><span class="line">        <span class="keyword">if</span> headertable[items[<span class="number">0</span>]][<span class="number">1</span>] <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            headertable[items[<span class="number">0</span>]][<span class="number">1</span>] = intree.children[items[<span class="number">0</span>]]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            update_header(headertable[items[<span class="number">0</span>]][<span class="number">1</span>], intree.children[items[<span class="number">0</span>]])</span><br><span class="line">    <span class="comment"># 递归遍历整个配置</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(items) &gt; <span class="number">1</span>:</span><br><span class="line">        update_fptree(items[<span class="number">1</span>::], intree.children[items[<span class="number">0</span>]], headertable, count)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">create_fptree</span>(<span class="params">dataset, minnum</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;创建FP树，使用最少出现的频次&quot;&quot;&quot;</span></span><br><span class="line">    headertable = &#123;&#125;</span><br><span class="line">    <span class="comment"># 统计每个元素的频次</span></span><br><span class="line">    <span class="keyword">for</span> rec <span class="keyword">in</span> dataset:</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> rec:</span><br><span class="line">            headertable[item] = headertable.get(item, <span class="number">0</span>) + dataset[rec]</span><br><span class="line">    <span class="comment"># 删除不满足minnum的元素</span></span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">list</span>(headertable.keys()):</span><br><span class="line">        <span class="keyword">if</span> headertable[k] &lt; minnum:</span><br><span class="line">            <span class="keyword">del</span> (headertable[k])</span><br><span class="line">    freq_itemset = <span class="built_in">set</span>(headertable.keys())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(freq_itemset) == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span>, <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> headertable:</span><br><span class="line">        headertable[k] = [headertable[k], <span class="literal">None</span>]</span><br><span class="line">    rettree = TreeNode(<span class="string">&#x27;Null Set&#x27;</span>, <span class="number">1</span>, <span class="literal">None</span>)</span><br><span class="line">    <span class="keyword">for</span> transet, count <span class="keyword">in</span> dataset.items():</span><br><span class="line">        localdict = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> transet:</span><br><span class="line">            <span class="comment"># 过滤，只取该样本中满足最小支持度的频繁项</span></span><br><span class="line">            <span class="keyword">if</span> item <span class="keyword">in</span> freq_itemset:</span><br><span class="line">                localdict[item] = headertable[item][<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(localdict) &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="comment"># 根据全局频数从大到小对样本排序</span></span><br><span class="line">            item_ordered = [v[<span class="number">0</span>] <span class="keyword">for</span> v <span class="keyword">in</span> <span class="built_in">sorted</span>(localdict.items(), key=<span class="keyword">lambda</span> q: (q[<span class="number">1</span>], q[<span class="number">0</span>]), reverse=<span class="literal">True</span>)]</span><br><span class="line">            <span class="comment"># 用过滤且排序后的样本更新树</span></span><br><span class="line">            update_fptree(item_ordered, rettree, headertable, count)</span><br><span class="line">    <span class="keyword">return</span> rettree, headertable</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ascend_fptree</span>(<span class="params">leafnode, prefixpath</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;递归回溯FP数，补全一条前缀路径，挖掘条件模式基的内部函数&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> leafnode.parent <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        prefixpath.append(leafnode.name)</span><br><span class="line">        ascend_fptree(leafnode.parent, prefixpath)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_prefixpath</span>(<span class="params">basepart, myheadertab</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;挖掘条件模式基&quot;&quot;&quot;</span></span><br><span class="line">    node = myheadertab[basepart][<span class="number">1</span>]</span><br><span class="line">    condparts = &#123;&#125;</span><br><span class="line">    <span class="keyword">while</span> node <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        prefixpath = []</span><br><span class="line">        ascend_fptree(node, prefixpath)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(prefixpath) &gt; <span class="number">1</span>:</span><br><span class="line">            condparts[<span class="built_in">frozenset</span>(prefixpath[<span class="number">1</span>:])] = node.count</span><br><span class="line">        <span class="comment"># 继续下一个basepart结点</span></span><br><span class="line">        node = node.link</span><br><span class="line">    <span class="keyword">return</span> condparts</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">mine_fptree</span>(<span class="params">headertable, minnums, prefix, freq_itemlist, needprint</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;递归挖掘频繁项集，preFix，freq_itemlist存储已挖掘到的频繁集，留空就好&quot;&quot;&quot;</span></span><br><span class="line">    biglist = [(v[<span class="number">0</span>], v[<span class="number">1</span>][<span class="number">0</span>]) <span class="keyword">for</span> v <span class="keyword">in</span> <span class="built_in">sorted</span>(headertable.items(), key=<span class="keyword">lambda</span> q: (q[<span class="number">1</span>][<span class="number">0</span>], q[<span class="number">0</span>]))]</span><br><span class="line">    biglistnum = <span class="built_in">len</span>(biglist)</span><br><span class="line">    printdict = &#123;&#125;</span><br><span class="line">    <span class="keyword">if</span> needprint:</span><br><span class="line">        <span class="comment"># 进度打印</span></span><br><span class="line">        checkpoints = linspace(<span class="number">11</span>, <span class="number">49</span>, biglistnum, dtype=<span class="built_in">int</span>)</span><br><span class="line">        printdict[<span class="number">0</span>] = checkpoints[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, biglistnum):</span><br><span class="line">            <span class="keyword">if</span> checkpoints[i] != checkpoints[i - <span class="number">1</span>]:</span><br><span class="line">                printdict[i] = checkpoints[i]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(biglistnum):</span><br><span class="line">        <span class="keyword">if</span> i <span class="keyword">in</span> printdict.keys():</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;正在由条件模式基挖掘频繁项#&#x27;</span> + <span class="built_in">str</span>(printdict[i]))</span><br><span class="line">        basepart = biglist[i]</span><br><span class="line">        newfreqset = prefix.copy()</span><br><span class="line">        newfreqset.add(basepart)</span><br><span class="line">        freq_itemlist.append(newfreqset)</span><br><span class="line">        condpartbases = find_prefixpath(basepart[<span class="number">0</span>], headertable)</span><br><span class="line">        <span class="comment"># 构造当前频繁项的条件FP树</span></span><br><span class="line">        mycondtree, myhead = create_fptree(condpartbases, minnums)</span><br><span class="line">        <span class="keyword">if</span> myhead <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># 递归挖掘条件FP树</span></span><br><span class="line">            mine_fptree(myhead, minnums, newfreqset, freq_itemlist, <span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">conf_cal</span>(<span class="params">freqset, supportdata, partsnum, rulelist, minconf</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算置信度和提升度，生成规则的内部函数&quot;&quot;&quot;</span></span><br><span class="line">    sd = supportdata[<span class="number">0</span>]</span><br><span class="line">    supportdata0 = supportdata[partsnum - <span class="number">2</span>]</span><br><span class="line">    supportdata1 = supportdata[partsnum - <span class="number">1</span>]</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> freqset:</span><br><span class="line">        conseq = <span class="built_in">frozenset</span>([item])</span><br><span class="line">        conf = supportdata1[freqset] / supportdata0[freqset - conseq]</span><br><span class="line">        lift = supportdata1[freqset] / (sd[conseq] * supportdata0[freqset - conseq])</span><br><span class="line">        <span class="keyword">if</span> conf &gt;= minconf <span class="keyword">and</span> lift &gt; <span class="number">1</span>:</span><br><span class="line">            rulelist.append((freqset - conseq, conseq, <span class="built_in">round</span>(supportdata1[freqset], <span class="number">4</span>), conf, lift))</span><br><span class="line">    <span class="keyword">return</span> rulelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">rules_gen</span>(<span class="params">l, supportdata, minconf, partsnum</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;生成规则&quot;&quot;&quot;</span></span><br><span class="line">    ln = l[partsnum - <span class="number">1</span>]</span><br><span class="line">    maxnum = <span class="built_in">len</span>(l)</span><br><span class="line">    bigrulelist = []</span><br><span class="line">    <span class="keyword">for</span> freqset <span class="keyword">in</span> ln:</span><br><span class="line">        conf_cal(freqset, supportdata, partsnum, bigrulelist, minconf)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;完成&#x27;</span> + <span class="built_in">str</span>(partsnum) + <span class="string">&#x27;部件组合的关联分析#&#x27;</span> + <span class="built_in">str</span>(<span class="number">50</span> + <span class="built_in">int</span>(partsnum / maxnum * <span class="number">40</span>)))</span><br><span class="line">    sys.stdout.flush()</span><br><span class="line">    <span class="keyword">return</span> bigrulelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">encode_dataset</span>(<span class="params">datasource</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码保证在建立和挖掘fp树的过程中item排序的一致性&quot;&quot;&quot;</span></span><br><span class="line">    dataset = &#123;&#125;</span><br><span class="line">    encodedict = &#123;&#125;</span><br><span class="line">    decodelist = []</span><br><span class="line">    maxconflen = <span class="number">0</span></span><br><span class="line">    i = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> order <span class="keyword">in</span> datasource:</span><br><span class="line">        maxconflen = <span class="built_in">max</span>(maxconflen, <span class="built_in">len</span>(order))</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(order)):</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                order[j] = encodedict[order[j]]</span><br><span class="line">            <span class="keyword">except</span> KeyError:</span><br><span class="line">                encodedict[order[j]] = i</span><br><span class="line">                decodelist.append(order[j])</span><br><span class="line">                order[j] = i</span><br><span class="line">                i += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">frozenset</span>(order) <span class="keyword">in</span> dataset:</span><br><span class="line">            dataset[<span class="built_in">frozenset</span>(order)] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataset[<span class="built_in">frozenset</span>(order)] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> dataset, maxconflen, decodelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">convert_freqitems</span>(<span class="params">decodelist, freqitems, totalnums, maxconflen</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;解码频繁项集&quot;&quot;&quot;</span></span><br><span class="line">    la = []</span><br><span class="line">    supportdata = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(maxconflen):</span><br><span class="line">        la.append([])</span><br><span class="line">        supportdata[i] = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> freqitems:</span><br><span class="line">        conf = <span class="built_in">frozenset</span>([decodelist[q[<span class="number">0</span>]] <span class="keyword">for</span> q <span class="keyword">in</span> item])</span><br><span class="line">        la[<span class="built_in">len</span>(conf) - <span class="number">1</span>].append(conf)</span><br><span class="line">        supportdata[<span class="built_in">len</span>(conf) - <span class="number">1</span>][conf] = <span class="built_in">min</span>([q[<span class="number">1</span>] <span class="keyword">for</span> q <span class="keyword">in</span> item]) / totalnums</span><br><span class="line">    ll = [l1 <span class="keyword">for</span> l1 <span class="keyword">in</span> la <span class="keyword">if</span> l1 != []]</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> <span class="built_in">list</span>(supportdata.keys()):</span><br><span class="line">        <span class="keyword">if</span> supportdata[key] == &#123;&#125;:</span><br><span class="line">            <span class="keyword">del</span> (supportdata[key])</span><br><span class="line">    <span class="keyword">return</span> ll, supportdata</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    support = <span class="number">0.3</span></span><br><span class="line">    confidence = <span class="number">0.7</span></span><br><span class="line">    <span class="comment"># 输入源为嵌套list，中间每一个list为一笔记录</span></span><br><span class="line">    dataSource = [[<span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;j&#x27;</span>, <span class="string">&#x27;p&#x27;</span>], [<span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, <span class="string">&#x27;v&#x27;</span>, <span class="string">&#x27;u&#x27;</span>, <span class="string">&#x27;t&#x27;</span>, <span class="string">&#x27;s&#x27;</span>], [<span class="string">&#x27;z&#x27;</span>], [<span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;n&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;s&#x27;</span>],</span><br><span class="line">                  [<span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;q&#x27;</span>, <span class="string">&#x27;t&#x27;</span>, <span class="string">&#x27;p&#x27;</span>], [<span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;q&#x27;</span>, <span class="string">&#x27;s&#x27;</span>, <span class="string">&#x27;t&#x27;</span>, <span class="string">&#x27;m&#x27;</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 编码，转为每一种订单结构的dict(frozenset:cnt)，并取得最长的订单的长度</span></span><br><span class="line">    dataSet, maxConfLen, decodeList = encode_dataset(dataSource)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建FP树，需要最小支持度对应的频数</span></span><br><span class="line">    supportNum = ceil(support * <span class="built_in">sum</span>(dataSet.values()))</span><br><span class="line">    myFPtree, myHeaderTab = create_fptree(dataSet, supportNum)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 挖掘频繁项集</span></span><br><span class="line">    freqItems = []</span><br><span class="line">    mine_fptree(myHeaderTab, supportNum, <span class="built_in">set</span>([]), freqItems, <span class="literal">True</span>)</span><br><span class="line">    L, supportData = convert_freqitems(decodeList, freqItems, <span class="built_in">sum</span>(dataSet.values()), maxConfLen)</span><br><span class="line">    <span class="comment"># 并行挖掘关联规则，需要最小关联度，内置了提升度要求lift &gt; 1</span></span><br><span class="line">    resLst = [[]] * (<span class="built_in">len</span>(L) - <span class="number">1</span>)</span><br><span class="line">    p = Pool(POOL_NUM)</span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(L)):</span><br><span class="line">        res = p.apply_async(rules_gen, args=(L, supportData, confidence, n + <span class="number">1</span>,))</span><br><span class="line">        resLst[n - <span class="number">1</span>] = res</span><br><span class="line">    p.close()</span><br><span class="line">    p.join()</span><br><span class="line">    <span class="comment"># 收集挖掘结果</span></span><br><span class="line">    rule = []</span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(resLst)):</span><br><span class="line">        rule += resLst[n].get()</span><br><span class="line"></span><br><span class="line">    rules = pd.DataFrame(rule)</span><br><span class="line">    rules.rename(index=<span class="built_in">str</span>, columns=&#123;<span class="number">0</span>: <span class="string">&#x27;LHS&#x27;</span>, <span class="number">1</span>: <span class="string">&#x27;RHS&#x27;</span>, <span class="number">2</span>: <span class="string">&#x27;Support&#x27;</span>, <span class="number">3</span>: <span class="string">&#x27;Confidence&#x27;</span>, <span class="number">4</span>: <span class="string">&#x27;Lift&#x27;</span>&#125;, inplace=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(rules)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee? Thx bro!</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/static/wechatpay.png" alt="Jiawei 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/static/alipay.png" alt="Jiawei 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E6%8C%96%E6%8E%98/" rel="tag"># 数据挖掘</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/11/20/%E7%94%A8Apriori%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/" rel="prev" title="用Apriori挖掘关联规则">
+                  <i class="fa fa-chevron-left"></i> 用Apriori挖掘关联规则
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/06/13/%E7%94%A8LDA%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%9E%8B%E5%81%9A%E5%9C%BA%E6%99%AF%E5%88%86%E7%B1%BB/" rel="next" title="用LDA主题模型做场景分类">
+                  用LDA主题模型做场景分类 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiawei</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdnjs.cloudflare.com/ajax/libs/ribbon.js/1.0.2/ribbon.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

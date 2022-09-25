@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"lijiaweinpc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本篇是该系列历史研究的最后一块组件。把两个部分的内容连起来，并用python实现了控制机械臂舵机转动保持一个人脸始终在摄像头中部的目标。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器视觉运动控制系列3：摄像头控制舵机小记">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/04/05/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%973%EF%BC%9A%E6%91%84%E5%83%8F%E5%A4%B4%E6%8E%A7%E5%88%B6%E8%88%B5%E6%9C%BA%E5%B0%8F%E8%AE%B0/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="本篇是该系列历史研究的最后一块组件。把两个部分的内容连起来，并用python实现了控制机械臂舵机转动保持一个人脸始终在摄像头中部的目标。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-25T10:46:52.776Z">
+<meta property="article:author" content="Jiawei">
+<meta property="article:tag" content="图像识别">
+<meta property="article:tag" content="运动控制">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://lijiaweinpc.github.io/2018/04/05/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%973%EF%BC%9A%E6%91%84%E5%83%8F%E5%A4%B4%E6%8E%A7%E5%88%B6%E8%88%B5%E6%9C%BA%E5%B0%8F%E8%AE%B0/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://lijiaweinpc.github.io/2018/04/05/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%973%EF%BC%9A%E6%91%84%E5%83%8F%E5%A4%B4%E6%8E%A7%E5%88%B6%E8%88%B5%E6%9C%BA%E5%B0%8F%E8%AE%B0/","path":"2018/04/05/机器视觉运动控制系列3：摄像头控制舵机小记/","title":"机器视觉运动控制系列3：摄像头控制舵机小记"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>机器视觉运动控制系列3：摄像头控制舵机小记 | VOID</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">VOID</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jiawei"
+      src="/static/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jiawei</p>
+  <div class="site-description" itemprop="description">Jiawei的小屋</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lijiaweinpc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lijiaweinpc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:npc_li@163.com" title="E-Mail → mailto:npc_li@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2018/04/05/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%973%EF%BC%9A%E6%91%84%E5%83%8F%E5%A4%B4%E6%8E%A7%E5%88%B6%E8%88%B5%E6%9C%BA%E5%B0%8F%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/static/avatar.jpg">
+      <meta itemprop="name" content="Jiawei">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+      <meta itemprop="description" content="Jiawei的小屋">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="机器视觉运动控制系列3：摄像头控制舵机小记 | VOID">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          机器视觉运动控制系列3：摄像头控制舵机小记
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-04-05 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-05T00:00:00+08:00">2018-04-05</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>  本篇是该系列历史研究的最后一块组件。把两个部分的内容连起来，并用python实现了控制机械臂舵机转动保持一个人脸始终在摄像头中部的目标。</p>
+<span id="more"></span>
+<p>  前面记了有face_recognition，跑通了Arduino控制舵机，现在把他们连在一起。<br />
+  先从python一侧入手，串口通信首先需要安装pyserial。分析下目标问题和解决方案：我想让我的机械臂追随着某个人，现在可以将摄像头固定在机械臂上，不停的在我的摄像头中识别人脸，如果识别到我要找的目标而他不在中间位置的话，发控制使机械臂对应转动调整就OK了。对单一舵机发出控制命令（就选之前转动底盘的12号位舵机吧），下面为python端源码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 控制一个舵机锁定人脸初版，对应ino为ctrl1servo</span></span><br><span class="line"><span class="keyword">import</span> face_recognition</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> serial</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这个是摄像头的宽度分辨率</span></span><br><span class="line">framewidth = <span class="number">640</span></span><br><span class="line"><span class="comment"># 注意串口号对应                </span></span><br><span class="line">ser = serial.Serial(<span class="string">&#x27;COM5&#x27;</span>, <span class="number">9600</span>)</span><br><span class="line"><span class="comment"># 摄像头张角45度，那么中间的位置就是23度</span></span><br><span class="line">s = <span class="number">23</span></span><br><span class="line">slast = <span class="number">23</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyThread</span>(threading.Thread):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, func, name=<span class="string">&#x27;&#x27;</span></span>):</span><br><span class="line">        threading.Thread.__init__(self)</span><br><span class="line">        self.name = name</span><br><span class="line">        self.func = func</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">if</span> self.name == <span class="string">&quot;send&quot;</span>:</span><br><span class="line">            matter1()</span><br><span class="line">        <span class="keyword">elif</span> self.name == <span class="string">&quot;change&quot;</span>:</span><br><span class="line">            matter2()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">matter1</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">global</span> s</span><br><span class="line">        <span class="keyword">global</span> slast</span><br><span class="line">        <span class="comment"># 识别发现位置有变化时发送转动指令</span></span><br><span class="line">        <span class="keyword">if</span> (s != slast):</span><br><span class="line">            ser.write(<span class="built_in">bytes</span>(<span class="built_in">str</span>(s), encoding=<span class="string">&quot;utf8&quot;</span>))</span><br><span class="line">            <span class="built_in">print</span>(s)</span><br><span class="line">        slast = s</span><br><span class="line">        <span class="comment"># 两秒内只发送一次，避免机械臂停不下来的问题</span></span><br><span class="line">        time.sleep(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">matter2</span>():</span><br><span class="line">    <span class="keyword">global</span> s</span><br><span class="line">    video_capture = cv2.VideoCapture(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    obama_image = face_recognition.load_image_file(<span class="string">&quot;obama.jpg&quot;</span>)</span><br><span class="line">    obama_face_encoding = face_recognition.face_encodings(obama_image)[<span class="number">0</span>]</span><br><span class="line">    lijiawei_image = face_recognition.load_image_file(<span class="string">&quot;lijiawei.jpg&quot;</span>)</span><br><span class="line">    lijiawei_face_encoding = face_recognition.face_encodings(lijiawei_image)[<span class="number">0</span>]</span><br><span class="line">    known_face_encodings = [</span><br><span class="line">        obama_face_encoding,</span><br><span class="line">        lijiawei_face_encoding]</span><br><span class="line">    known_face_names = [</span><br><span class="line">        <span class="string">&quot;Obama&quot;</span>,</span><br><span class="line">        <span class="string">&quot;lijiawei&quot;</span>]</span><br><span class="line"></span><br><span class="line">    num = <span class="number">0</span></span><br><span class="line">    process_this_frame = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        ret, frame = video_capture.read()</span><br><span class="line"></span><br><span class="line">        small_frame = cv2.resize(frame, (<span class="number">0</span>, <span class="number">0</span>), fx=<span class="number">0.25</span>, fy=<span class="number">0.25</span>)</span><br><span class="line">        rgb_small_frame = small_frame[:, :, ::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> process_this_frame:</span><br><span class="line">            face_locations = face_recognition.face_locations(rgb_small_frame)</span><br><span class="line">            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)</span><br><span class="line">        process_this_frame = <span class="keyword">not</span> process_this_frame</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (top, right, bottom, left), face_encoding <span class="keyword">in</span> <span class="built_in">zip</span>(face_locations, face_encodings):</span><br><span class="line">            top *= <span class="number">4</span></span><br><span class="line">            right *= <span class="number">4</span></span><br><span class="line">            bottom *= <span class="number">4</span></span><br><span class="line">            left *= <span class="number">4</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># s定位是现在人脸的位置</span></span><br><span class="line">            s = <span class="built_in">int</span>((left + right - <span class="number">1</span>) / framewidth * <span class="number">45</span> / <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)</span><br><span class="line">            name = <span class="string">&quot;Unknown&quot;</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(known_face_names)):</span><br><span class="line">                <span class="keyword">if</span> matches[i]:</span><br><span class="line">                    name = known_face_names[i]</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">            cv2.putText(frame, <span class="string">&quot;cam&quot;</span>, (<span class="number">50</span>, <span class="number">100</span>), cv2.FONT_HERSHEY_DUPLEX, <span class="number">1</span>, (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line">            num = num + <span class="number">1</span></span><br><span class="line">            filename = <span class="string">&quot;output/frames_%s.jpg&quot;</span> % num</span><br><span class="line">            cv2.imwrite(filename, frame)</span><br><span class="line"></span><br><span class="line">            cv2.rectangle(frame, (left, top), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">2</span>)</span><br><span class="line">            cv2.rectangle(frame, (left, bottom - <span class="number">35</span>), (right, bottom), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), cv2.FILLED)</span><br><span class="line">            font = cv2.FONT_HERSHEY_DUPLEX</span><br><span class="line">            cv2.putText(frame, name, (left + <span class="number">6</span>, bottom - <span class="number">6</span>), font, <span class="number">1.0</span>, (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        cv2.imshow(<span class="string">&#x27;Video&#x27;</span>, frame)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> cv2.waitKey(<span class="number">1</span>) &amp; <span class="number">0xFF</span> == <span class="built_in">ord</span>(<span class="string">&#x27;q&#x27;</span>):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    video_capture.release()</span><br><span class="line">    cv2.destroyAllWindows()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># 一个线程发送控制信号，一个线程专门做识别</span></span><br><span class="line">    thing1 = MyThread(matter1, <span class="string">&quot;send&quot;</span>)</span><br><span class="line">    thing2 = MyThread(matter2, <span class="string">&quot;change&quot;</span>)</span><br><span class="line">    thing1.start()</span><br><span class="line">    thing2.start()</span><br><span class="line">    thing1.join()</span><br><span class="line">    thing2.join()</span><br><span class="line">    <span class="comment"># 断开连接</span></span><br><span class="line">    ser.close()</span><br></pre></td></tr></table></figure>
+<p>  这样python会把当前目标在摄像头中的角度位置传入arduino，这边对应的控制处理方法ctrl1servo.ino为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Servo.h&gt;</span> </span></span><br><span class="line">Servo myservo;  </span><br><span class="line"><span class="type">int</span> pos = <span class="number">90</span>;</span><br><span class="line"><span class="type">int</span> poslast = <span class="number">90</span>;</span><br><span class="line"><span class="comment">//串口接收角度数据，转int</span></span><br><span class="line"><span class="type">int</span> nextmove = <span class="number">0</span>;</span><br><span class="line"><span class="type">char</span> line[<span class="number">100</span>] = <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">setup</span><span class="params">()</span> </span><br><span class="line">&#123;</span><br><span class="line">  Serial.begin(<span class="number">9600</span>); </span><br><span class="line">  myservo.attach(<span class="number">12</span>);</span><br><span class="line">  myservo.write(pos);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">loop</span><span class="params">()</span> </span><br><span class="line">&#123;</span><br><span class="line">  poslast = pos;</span><br><span class="line">  <span class="keyword">if</span> (Serial.available() &gt; <span class="number">0</span>) </span><br><span class="line">  &#123;</span><br><span class="line">    nextmove = Serial.readBytesUntil(<span class="string">&#x27;\n&#x27;</span>, line, <span class="number">500</span>);</span><br><span class="line">    nextmove = atoi(line);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">5</span>;i++)</span><br><span class="line">    &#123;</span><br><span class="line">      line[i]=<span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    Serial.println(nextmove);   </span><br><span class="line">    </span><br><span class="line">   <span class="comment">//如果人脸中心在15到30度之间的话可以接受，就不用转动了</span></span><br><span class="line">   <span class="keyword">if</span>(nextmove &gt; <span class="number">30</span>)</span><br><span class="line">   &#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>;i &lt; nextmove - <span class="number">22</span>;i += <span class="number">1</span>) </span><br><span class="line">    &#123;</span><br><span class="line">     pos -= <span class="number">1</span>;</span><br><span class="line">     pos=constrain(pos,<span class="number">0</span>,<span class="number">180</span>);</span><br><span class="line">     <span class="keyword">if</span>(!(pos == poslast))</span><br><span class="line">     &#123;</span><br><span class="line">      myservo.write(pos);</span><br><span class="line">      delay(<span class="number">20</span>);</span><br><span class="line">     &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span>(nextmove &lt; <span class="number">15</span>)</span><br><span class="line">   &#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">23</span> - nextmove;i += <span class="number">1</span>) </span><br><span class="line">    &#123;</span><br><span class="line">     pos += <span class="number">1</span>;</span><br><span class="line">     pos=constrain(pos,<span class="number">0</span>,<span class="number">180</span>);</span><br><span class="line">     <span class="keyword">if</span>(!(pos == poslast))</span><br><span class="line">     &#123;</span><br><span class="line">      myservo.write(pos);</span><br><span class="line">      delay(<span class="number">20</span>);</span><br><span class="line">     &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   &#125;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  之前做的这个项目想法还是很有意思的，基本功能跑通算是实现了，但效果上看仍有很大的改进空间，结果boss突然出了些事情，出师未捷吧哈哈瞬间没了动力，哎。。。有时间了有新的想法的话我再把他捡起来继续完善和优化吧。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee? Thx bro!</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/static/wechatpay.png" alt="Jiawei 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/static/alipay.png" alt="Jiawei 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E8%AF%86%E5%88%AB/" rel="tag"># 图像识别</a>
+              <a href="/tags/%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6/" rel="tag"># 运动控制</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/04/04/%E6%9C%BA%E5%99%A8%E8%A7%86%E8%A7%89%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E7%B3%BB%E5%88%972%EF%BC%9AArduino%E8%88%B5%E6%9C%BA%E6%8E%A7%E5%88%B6%E7%A0%94%E7%A9%B6%E7%AC%94%E8%AE%B0/" rel="prev" title="机器视觉运动控制系列2：Arduino舵机控制研究笔记">
+                  <i class="fa fa-chevron-left"></i> 机器视觉运动控制系列2：Arduino舵机控制研究笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/06/13/%E5%A4%96%E6%B1%87%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E5%BB%BA%E5%BA%93/" rel="next" title="外汇历史数据建库">
+                  外汇历史数据建库 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiawei</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdnjs.cloudflare.com/ajax/libs/ribbon.js/1.0.2/ribbon.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

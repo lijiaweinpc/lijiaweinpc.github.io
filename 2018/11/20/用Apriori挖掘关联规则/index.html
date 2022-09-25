@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"lijiaweinpc.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Apriori挖掘关联规则">
+<meta property="og:url" content="https://lijiaweinpc.github.io/2018/11/20/%E7%94%A8Apriori%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/index.html">
+<meta property="og:site_name" content="VOID">
+<meta property="og:description" content="Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-11-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-25T10:46:52.777Z">
+<meta property="article:author" content="Jiawei">
+<meta property="article:tag" content="数据挖掘">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://lijiaweinpc.github.io/2018/11/20/%E7%94%A8Apriori%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://lijiaweinpc.github.io/2018/11/20/%E7%94%A8Apriori%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/","path":"2018/11/20/用Apriori挖掘关联规则/","title":"用Apriori挖掘关联规则"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用Apriori挖掘关联规则 | VOID</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">VOID</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jiawei"
+      src="/static/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jiawei</p>
+  <div class="site-description" itemprop="description">Jiawei的小屋</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lijiaweinpc" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lijiaweinpc" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:npc_li@163.com" title="E-Mail → mailto:npc_li@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lijiaweinpc.github.io/2018/11/20/%E7%94%A8Apriori%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/static/avatar.jpg">
+      <meta itemprop="name" content="Jiawei">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VOID">
+      <meta itemprop="description" content="Jiawei的小屋">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用Apriori挖掘关联规则 | VOID">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用Apriori挖掘关联规则
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-20 00:00:00" itemprop="dateCreated datePublished" datetime="2018-11-20T00:00:00+08:00">2018-11-20</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>  Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。</p>
+<span id="more"></span>
+<p>  Apriori是进行频繁项挖掘的经典算法，他的原理最为简洁易懂，通过对逐层递进硬统计的剪枝，可以减少统计的对象从而提高计算的效率。举个例子：当support(<br />
+A) &lt; support threshold，那显然会有support(A,B) &lt; support<br />
+threshold，频繁项的子集必定是频繁项；所以当我们发现了这样一个A不满足我们挖掘所设置的支持度阈值的时候，所有涉及A的组合也不必再进行统计了。Apriori最大的问题在于当频繁集的深度非常大的时候，挖掘的效率就会变得很低，即统计的对象越发接近2^n。<br />
+  在找到了所有频繁项以及统计出支持度后，我们还会用关联度（其实还有提升度）来筛选生成规则。所谓规则，我们想要得到的insights是买了AB的人大概率会买C，这样我们就可以把C推荐给再来买AB的人……举个例子：就用上面的ABC，当我们发现了这个频繁集(<br />
+A,B,C)之后，我们依次去检视以下规则的概率（即关联度）：<br />
+  (B,C) =&gt; A; (A,C) =&gt; B; (A,B) =&gt; C<br />
+  关联度需要：conf = P((A,B) =&gt; C) = P(A,B,C) / P(A,B) &gt; confidence threshold<br />
+  提升度需要：lift = P((A,B) =&gt; C) / P© &gt; lift threshold<br />
+  在上例中，支持度要求(A,B,C)首先是个频繁集，那么我们找到的并不是一个很小众的规则；关联度保证了买(A,B)<br />
+组合的人大概率会买C，它是我们挖掘规则的直观价值；提升度的本质是相关性，若提升度很低(&lt;1)<br />
+，买C的人本身就很多，任何情况你推荐买C都有道理，那这条规则也没有意义。<br />
+  在挖掘规则中，上例的情况很多时候大家会检视所有子集生成规则的概率，即还包括：<br />
+  A =&gt; (B,C); B =&gt; (A,C); C =&gt; (B,C)<br />
+  如果上升到(A,B,C,D)，更会有：A =&gt; (B,C,D); (A,B) =&gt; (C,D)……<br />
+  这样带来的问题是结果集非常的冗余，所以这里我只挖掘规则右边RHS只有一个item的规则，压缩结果同时也能提高算法和结果审视的效率。我在挖掘频繁项和生成规则中都加了进度打印(<br />
+区间为整个过程的10%~90%)，格式是方便前台转为进度条呈现；每次打印都使用sys.stdout.flush()是为了作为文件被jython调用的话可以实时捕获到我的打印。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">c1_create</span>(<span class="params">dataset</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    将dataset中的所有单个部件A, B, C, D排序整理成[[&#x27;A&#x27;], [&#x27;B&#x27;], [&#x27;C&#x27;], [&#x27;D&#x27;]]，</span></span><br><span class="line"><span class="string">    返回时再转成frozenset, frozenset与set的区别是可以作为字典的键。</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    c1 = []</span><br><span class="line">    <span class="keyword">for</span> transaction <span class="keyword">in</span> dataset:</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> transaction:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> [item] <span class="keyword">in</span> c1:</span><br><span class="line">                c1.append([item])</span><br><span class="line">    c1.sort()</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">frozenset</span>, c1))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">apriori_gen</span>(<span class="params">lk, k</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;由初始候选项集的集合Lk生成新的生成候选项集&quot;&quot;&quot;</span></span><br><span class="line">    retlist = []</span><br><span class="line">    lenlk = <span class="built_in">len</span>(lk)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(lenlk):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i + <span class="number">1</span>, lenlk):</span><br><span class="line">            <span class="comment"># AB 和 AC 中因为A相等才能拿来生成 ABC, 确保了生成的是k项</span></span><br><span class="line">            l1 = <span class="built_in">list</span>(lk[i])</span><br><span class="line">            l2 = <span class="built_in">list</span>(lk[j])</span><br><span class="line">            l1.sort()</span><br><span class="line">            l2.sort()</span><br><span class="line">            <span class="keyword">if</span> l1[: k - <span class="number">2</span>] == l2[: k - <span class="number">2</span>]:</span><br><span class="line">                retlist.append(lk[i] | lk[j])</span><br><span class="line">    <span class="keyword">return</span> retlist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">support_cal</span>(<span class="params">d, ck, minsupport</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算备选项集的支持度，将满足minSupport要求的项集加入L，将项集支持度字典返回为supportData&quot;&quot;&quot;</span></span><br><span class="line">    sscnt = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> tid <span class="keyword">in</span> d:</span><br><span class="line">        <span class="keyword">for</span> can <span class="keyword">in</span> ck:</span><br><span class="line">            <span class="keyword">if</span> can.issubset(tid):</span><br><span class="line">                <span class="keyword">if</span> can <span class="keyword">not</span> <span class="keyword">in</span> sscnt:</span><br><span class="line">                    sscnt[can] = d[tid]</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    sscnt[can] += d[tid]</span><br><span class="line">    numitems = <span class="built_in">float</span>(<span class="built_in">sum</span>(d.values()))</span><br><span class="line">    retlist = []</span><br><span class="line">    supportdata = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> sscnt:</span><br><span class="line">        support = sscnt[key] / numitems</span><br><span class="line">        <span class="keyword">if</span> support &gt;= minsupport:</span><br><span class="line">            retlist.insert(<span class="number">0</span>, key)</span><br><span class="line">            supportdata[key] = support</span><br><span class="line">    <span class="keyword">return</span> retlist, supportdata</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">conf_cal</span>(<span class="params">freqset, supportdata, rulelist, minconf</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算置信度和提升度，生成规则的内部函数&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> freqset:</span><br><span class="line">        conseq = <span class="built_in">frozenset</span>([item])</span><br><span class="line">        conf = supportdata[freqset] / supportdata[freqset - conseq]</span><br><span class="line">        lift = supportdata[freqset] / (supportdata[conseq] * supportdata[freqset - conseq])</span><br><span class="line">        <span class="keyword">if</span> conf &gt;= minconf <span class="keyword">and</span> lift &gt; <span class="number">1</span>:</span><br><span class="line">            rulelist.append((freqset - conseq, conseq, <span class="built_in">round</span>(supportdata[freqset], <span class="number">4</span>), conf, lift))</span><br><span class="line">    <span class="keyword">return</span> rulelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">rules_gen</span>(<span class="params">l, supportdata, minconf</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;生成规则&quot;&quot;&quot;</span></span><br><span class="line">    bigrulelist = []</span><br><span class="line">    step = <span class="built_in">int</span>(<span class="number">40</span> / <span class="built_in">len</span>(l))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(l)):</span><br><span class="line">        <span class="keyword">for</span> freqset <span class="keyword">in</span> l[i]:</span><br><span class="line">            conf_cal(freqset, supportdata, bigrulelist, minconf)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;正在进行部件组合的关联分析:&#x27;</span> + <span class="built_in">str</span>(i) + <span class="string">&#x27;/&#x27;</span> + <span class="built_in">str</span>(<span class="built_in">len</span>(l)) + <span class="string">&#x27;#&#x27;</span> + <span class="built_in">str</span>(<span class="number">50</span> + i * step))</span><br><span class="line">        sys.stdout.flush()</span><br><span class="line">    <span class="keyword">return</span> bigrulelist</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">apriori_main</span>(<span class="params">dataset, minsupport</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;用Apriori算法挖掘频繁集，maxconflen是最长集合的长度，他是挖掘可能的最大深度&quot;&quot;&quot;</span></span><br><span class="line">    step = <span class="built_in">max</span>(<span class="built_in">int</span>(<span class="number">40</span> / maxconflen), <span class="number">1</span>)</span><br><span class="line">    c1 = c1_create(dataset)</span><br><span class="line">    l1, supportdata = support_cal(dataset, c1, minsupport)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;正在进行迭代分析:1/&#x27;</span> + <span class="built_in">str</span>(maxconflen) + <span class="string">&#x27;#&#x27;</span> + <span class="built_in">str</span>(<span class="number">10</span> + step))</span><br><span class="line">    sys.stdout.flush()</span><br><span class="line">    <span class="comment"># 一个k项集整体是la的一个元素</span></span><br><span class="line">    la = [l1]</span><br><span class="line">    k = <span class="number">2</span></span><br><span class="line">    <span class="comment"># 迭代计算的新k频繁集会追加在L中</span></span><br><span class="line">    <span class="keyword">while</span> <span class="built_in">len</span>(la[k - <span class="number">2</span>]) &gt; <span class="number">0</span>:</span><br><span class="line">        ck = apriori_gen(la[k - <span class="number">2</span>], k)</span><br><span class="line">        lk, supk = support_cal(dataset, ck, minsupport)</span><br><span class="line">        supportdata.update(supk)</span><br><span class="line">        la.append(lk)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;正在进行迭代分析:&#x27;</span> + <span class="built_in">str</span>(k) + <span class="string">&#x27;/&#x27;</span> + <span class="built_in">str</span>(maxconflen) + <span class="string">&#x27;#&#x27;</span> + <span class="built_in">str</span>(<span class="number">10</span> + k * step))</span><br><span class="line">        sys.stdout.flush()</span><br><span class="line">        k += <span class="number">1</span></span><br><span class="line">    <span class="comment"># 最后一个k总会没有备选项了可以把它删掉</span></span><br><span class="line">    <span class="keyword">del</span> la[-<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">return</span> la, supportdata</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    support = <span class="number">0.3</span></span><br><span class="line">    confidence = <span class="number">0.7</span></span><br><span class="line">    <span class="comment"># 输入源为嵌套list，中间每一个list为一笔记录</span></span><br><span class="line">    dataSource = [[<span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;j&#x27;</span>, <span class="string">&#x27;p&#x27;</span>], [<span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;w&#x27;</span>, <span class="string">&#x27;v&#x27;</span>, <span class="string">&#x27;u&#x27;</span>, <span class="string">&#x27;t&#x27;</span>, <span class="string">&#x27;s&#x27;</span>], [<span class="string">&#x27;z&#x27;</span>], [<span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;n&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;s&#x27;</span>],</span><br><span class="line">                  [<span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;q&#x27;</span>, <span class="string">&#x27;t&#x27;</span>, <span class="string">&#x27;p&#x27;</span>], [<span class="string">&#x27;y&#x27;</span>, <span class="string">&#x27;z&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;q&#x27;</span>, <span class="string">&#x27;s&#x27;</span>, <span class="string">&#x27;t&#x27;</span>, <span class="string">&#x27;m&#x27;</span>]]</span><br><span class="line">    <span class="comment"># 预处理，转为每一种订单结构的dict(frozenset:cnt)，并取得最长订单的长度</span></span><br><span class="line">    dataSet = &#123;&#125;</span><br><span class="line">    maxconflen = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> order <span class="keyword">in</span> dataSource:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">frozenset</span>(order) <span class="keyword">in</span> dataSet:</span><br><span class="line">            dataSet[<span class="built_in">frozenset</span>(order)] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataSet[<span class="built_in">frozenset</span>(order)] = <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(order) &gt; maxconflen:</span><br><span class="line">                maxconflen = <span class="built_in">len</span>(order)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 挖掘频繁项集，需要最小支持度</span></span><br><span class="line">    L, supportData = apriori_main(dataSet, support)</span><br><span class="line">    <span class="comment"># 生成规则，需要最小关联度，内置了提升度要求lift &gt; 1</span></span><br><span class="line">    rules = pd.DataFrame(rules_gen(L, supportData, confidence))</span><br><span class="line">    rules.rename(index=<span class="built_in">str</span>, columns=&#123;<span class="number">0</span>: <span class="string">&#x27;LHS&#x27;</span>, <span class="number">1</span>: <span class="string">&#x27;RHS&#x27;</span>, <span class="number">2</span>: <span class="string">&#x27;Support&#x27;</span>, <span class="number">3</span>: <span class="string">&#x27;Confidence&#x27;</span>, <span class="number">4</span>: <span class="string">&#x27;Lift&#x27;</span>&#125;, inplace=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(rules)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee? Thx bro!</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/static/wechatpay.png" alt="Jiawei 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/static/alipay.png" alt="Jiawei 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E6%8C%96%E6%8E%98/" rel="tag"># 数据挖掘</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/11/14/lasso+randomforest%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7/" rel="prev" title="lasso+randomforest预测房价">
+                  <i class="fa fa-chevron-left"></i> lasso+randomforest预测房价
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/01/28/%E7%94%A8FP-growth%E6%8C%96%E6%8E%98%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99/" rel="next" title="用FP-growth挖掘关联规则">
+                  用FP-growth挖掘关联规则 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiawei</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdnjs.cloudflare.com/ajax/libs/ribbon.js/1.0.2/ribbon.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
