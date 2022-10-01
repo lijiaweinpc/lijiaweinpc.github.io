@@ -13,7 +13,7 @@ tags: [图像识别,运动控制]
 &emsp;&emsp;当时小项目的第一步是想要在摄像头中识别出人脸，比较了几个库后face_recognition的介绍比较贴切也好实现，就对他研究比较多。昨天重新搭环境莫名的不顺利，所以也记下过程备查。face_recognition依赖dlib，直接下载dlib提示需要cmake，而cmake又需要vs，装了vs2017
 conmunity，确定支持cmake编译时突然回忆起自己之前不是这么麻烦搞的吧，才想起时pypi上的dlib。。。得嘞这也省事，所以直接pypi上下载然后install搞定，之后pip安装face_recognition，opencv-python，部署完成。
 
-&emsp;&emsp;配置好了环境之后按照face_recognition的example，先跑一下benchmark.py**看一下机器的能力：**
+&emsp;&emsp;配置好了环境之后按照face_recognition的example，先跑一下benchmark**看一下机器的能力：**
 
 ```bazaar
 All benchmarks are only using a single CPU core
