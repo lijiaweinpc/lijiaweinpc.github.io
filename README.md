@@ -12,3 +12,4 @@
 - 用FP-growth挖掘关联规则
 - python数据库交互简记
 - 合并bilibili导出的blv碎片文件
+- MT4登录、交易数据、时间、点值等速查
