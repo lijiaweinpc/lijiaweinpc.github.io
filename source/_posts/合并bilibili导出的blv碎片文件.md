@@ -88,4 +88,4 @@ def convert_blv(source_path: str, target_path: str):
 ```
 
 完整的参考脚本：
-[blv_collector.py](/static/合并bilibili导出的blv碎片文件/blv_collector.py)
+[bili_collector.py](/static/scripts/bili_converter.py)
