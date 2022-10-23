@@ -5,104 +5,87 @@ tags: 技术杂文
 ---
 
 &emsp;&emsp;当使用手机缓存B站的视频时会发现，一个视频被拆成了很多blv格式的碎片，将大量的碎片合并成一个mp4文件，这里记录的方法作者原文在[https://www.cnblogs.com/FHC1994/p/10760809.html](https://www.cnblogs.com/FHC1994/p/10760809.html)
-&emsp;&emsp;19.10.23补充：现在的策略是一个视频被拆成了video.m4s和audio.m4s两个部分，从合并上来说其实更简单了。
+&emsp;&emsp;19.10.23更新：现在的策略是一个视频被拆成了video.m4s和audio.m4s两个部分，从合并上来说其实更简单了。（bilibili在我安卓手机的缓存路径为：此电脑\iQOO Neo3\内部存储设备\Android\data\tv.danmaku.bili\download\<某个视频>）
+&emsp;&emsp;22.10.15更新：使用ffmpeg进行合并转换。
 <!--more-->
 
-&emsp;&emsp;blv碎片的整合方式：
-
+&emsp;&emsp;22.10.15更新：使用ffmpeg进行合并转换。原来的moviepy太慢了，合并一个200M左右的视频要一个多小时，同样的ffmpeg命令行测试大约只要三分钟。。。
+ffmpeg首先需要下载他的执行包，然后的核心命令是：
+```bash
+.\ffmpeg.exe -i video.m4s -i audio.m4s -codec copy Output.mp4
+```
+所以我们新加一个convert_m4s_ffmpeg方法如下：
 ```python
-# 批量合并特定文件夹下的视频文件，然后输出到指定文件夹下
-# 主要是需要moviepy这个库
-import moviepy.editor as me
 import os
-from natsort import natsorted
-
-# psutil是一个跨平台库能够轻松实现获取系统运行的进程和系统利用率（包括CPU、内存、磁盘、网络等）信息。它主要用来做系统监控，性能分析，进程管理。它实现了同等命令行工具提供的功能，如ps、top、lsof、netstat、ifconfig、who、df、kill、free、nice、ionice、iostat、iotop、uptime、pidof、tty、taskset、pmap等。目前支持32位和64位的Linux、Windows、OS X、FreeBSD和Sun Solaris等操作系统.
-import psutil
-
-
-# 杀死moviepy产生的特定进程
-def killProcess():
-    # 处理python程序在运行中出现的异常和错误
-    try:
-        # pids方法查看系统全部进程
-        pids = psutil.pids()
-        for pid in pids:
-            # Process方法查看单个进程
-            p = psutil.Process(pid)
-            # print('pid-%s,pname-%s' % (pid, p.name()))
-            # 进程名
-            if p.name() == 'ffmpeg-win64-v4.1.exe':
-                # 关闭任务 /f是强制执行，/im对应程序名
-                cmd = 'taskkill /f /im ffmpeg-win64-v4.1.exe  2>nul 1>null'
-                # python调用Shell脚本执行cmd命令
-                os.system(cmd)
-    except:
-        pass
+def convert_m4s_ffmpeg(source_path: str, target_path: str, ffmpeg_path: str):
+    folders = os.listdir(source_path)
+    for folder in folders:
+        for root, dirs, files in os.walk(os.path.join(source_path, folder)):
+            if "video.m4s" in files and "audio.m4s" in files:
+                video_path = os.path.join(root, "video.m4s")
+                audio_path = os.path.join(root, "audio.m4s")
+                target = os.path.join(target_path, folder + ".mp4")
+                ffmpeg_cmd = ffmpeg_path + " -i " + video_path + " -i " + audio_path + " -codec copy " + target
+                os.system(ffmpeg_cmd)
+                print("{}---{}---拼接成功！".format(folder, "{}.mp4".format(folder)))
 
 
 if __name__ == '__main__':
-    # 把这里改成大量视频缓存导出的根目录
-    mydirs = r"D:\12551207"
-    folders = os.listdir(mydirs)
+    # 复制:此电脑\iQOO Neo3\内部存储设备\Android\data\tv.danmaku.bili\download\465916979->D:\465916979
+    source_dir = r"D:\465916979"
+    ffmpeg = r"E:\ffmpeg\bin\ffmpeg.exe"
+    convert_m4s_ffmpeg(source_dir, r'D:', ffmpeg)
+```
+
+-----
+&emsp;&emsp;19.10.23更新bilibili现在的策略是一个视频被拆成了video.m4s和audio.m4s两个部分，从合并上来说其实更简单了，合并video.m4s和audio.m4s的方法：
+
+```python
+def convert_m4s(source_path: str, target_path: str):
+    folders = os.listdir(source_path)
     for folder in folders:
-        dirnow = os.path.join(mydirs, folder)
-        # 定义拼接视频的数组
-        L = []
-        # 访问 video 文件夹
-        # root指的是当前正在遍历的这个文件夹的本身的地址，dirs是一个 list，内容是该文件夹中所有的目录的名字(不包括子目录)，files同样是 list，内容是该文件夹中所有的文件(不包括子目录)
-        for root, dirs, files in os.walk(dirnow):
-            # 按文件名排序
-            # files.sort()
+        for root, dirs, files in os.walk(os.path.join(source_path, folder)):
+            if "video.m4s" in files and "audio.m4s" in files:
+                video_clip = me.VideoFileClip(os.path.join(root, "video.m4s"))
+                audio_clip = me.AudioFileClip(os.path.join(root, "audio.m4s"))
+                video_clip = video_clip.set_audio(audio_clip)
+        target = os.path.join(target_path, folder + ".mp4")
+        video_clip.write_videofile(target, fps=24, remove_temp=True)
+        print("{}---{}---拼接成功！".format(folder, "{}.mp4".format(folder)))
+```
+&emsp;&emsp;需要先将缓存文件拷贝到本地，然后执行convert_m4s方法，之后还需要手工check每个文件的具体名字，所以不适合大批量分p的小文件操作。。。
+
+-----
+&emsp;&emsp;之前blv碎片的整合方式：
+```python
+def convert_blv(source_path: str, target_path: str):
+    folders = os.listdir(source_path)
+    for folder in folders:
+        tmp_video = []
+        # root指的是当前正在遍历的这个文件夹，dirs是该文件夹中所有的目录的名字(不包括子目录)，files是该文件夹中所有的文件(不包括子目录)
+        for root, dirs, files in os.walk(os.path.join(source_path, folder)):
             # 自然排序法
             files = natsorted(files)
-            # print(files)
-            # 遍历所有文件
             for file in files:
-                # os.path.splitext(“文件路径”)    分离文件名与扩展名：默认返回(fname, fextension)元组，可做分片操作
                 # 如果后缀名为 .blv
                 if os.path.splitext(file)[1] == '.blv':
                     # .blv格式视频的完整路径
-                    filePath = os.path.join(root, file)
+                    file_path = os.path.join(root, file)
                     # 读取视频到内存
-                    myvideo = me.VideoFileClip(filePath)
+                    my_video = me.VideoFileClip(file_path)
                     # 添加到数组
-                    L.append(myvideo)
+                    tmp_video.append(my_video)
         # 对多个视频在时长上进行拼接
-        final_clip = me.concatenate_videoclips(L)
-        targetdir = r"D:\{}.mp4".format(folder)
-        # 法一：生成目标视频文件方法
-        # final_clip.to_videofile(targetdir, fps=24)
-        # 法二：最常规的生成目标视频文件方法
-        final_clip.write_videofile(targetdir, fps=24,
-                                   remove_temp=True)  # remove_temp=True表示生成的音频文件是临时存放的，视频生成后，音频文件会自动处理掉！若为False表示，音频文件会同时生成！
+        final_clip = me.concatenate_videoclips(tmp_video)
+        target = os.path.join(target_path, folder + ".mp4")
+        final_clip.write_videofile(target, fps=24,
+                                   # remove_temp=True表示生成的音频文件是临时存放的，视频生成后，单独音频文件会自动处理掉！
+                                   remove_temp=True)
         print("{}---{}---拼接成功！".format(folder, "{}.mp4".format(folder)))
-        killProcess()
+        kill_process('ffmpeg-win64-v4.1.exe')  # moviepy产生的特定进程自动关闭有异常
     cmd = 'shutdown -s -t 10'
     os.system(cmd)
 ```
 
-&emsp;&emsp;19.10.23补充合并video.m4s和audio.m4s的方法：
-
-```python
-# -*- coding: utf-8 -*-
-import moviepy.editor as me
-import os
-
-if __name__ == '__main__':
-    mydirs = r"D:\test"
-    folders = os.listdir(mydirs)
-    for folder in folders:
-        dirnow = os.path.join(mydirs, folder)
-        for root, dirs, files in os.walk(dirnow):
-            if "video.m4s" in files and "audio.m4s" in files:
-                videoclip = me.VideoFileClip(os.path.join(root, "video.m4s"))
-                audioclip = me.AudioFileClip(os.path.join(root, "audio.m4s"))
-                videoclip = videoclip.set_audio(audioclip)
-        targetdir = r"D:\{}.mp4".format(folder)
-        videoclip.write_videofile(targetdir, fps=24, remove_temp=True)
-        print("{}---{}---拼接成功！".format(folder, "{}.mp4".format(folder)))
-```
-
 完整的参考脚本：
-[blv_collector.py](/static/合并bilibili导出的blv碎片文件/blv_collector.py)
+[bili_collector.py](/static/scripts/bili_converter.py)
